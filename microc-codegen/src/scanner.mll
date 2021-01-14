@@ -33,8 +33,8 @@ rule token = parse
                   with Not_found -> ID(word)
                  }
     | digit+ as integer {INTEGER(int_of_string integer)}
-    | "true" {BOOL(true)}
-    | "false"{BOOL(false)}
+    | "true" {TRUE}
+    | "false"{FALSE}
     | '\''['a'-'z''A'-'Z''0'-'9']{1} '\'' as c {CHAR(c)}
     | "//" {singlelinecomment lexbuf}
     | "/*" {multilinecomment lexbuf}
