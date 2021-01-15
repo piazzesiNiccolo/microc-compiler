@@ -62,6 +62,7 @@ rule token = parse
     | '&' {ADDRESS}
     | "&&" {AND}
     | "||" {OR}
+    | eof   {EOF}
     | _ as c           { Util.raise_lexer_error lexbuf ("Illegal character " ^ Char.escaped c) }
 
 and singlelinecomment = parse
