@@ -43,28 +43,63 @@
 
 /* Grammar specification */
 
-program:
-  | t = [topdecl]             {PROG([t])}
-  |  EOF                      {Prog([])}
-;
+vartyp:
+    INT   {TypI}
+  | CHAR  {TypC}
+  | BOOL  {TypB}
 
-topdecl:
-
-typ:
+funtyp:
     INT   {TypI}
   | CHAR  {TypC}
   | BOOL  {TypB}
   | VOID  {TypV}
 
-block:
- 
-stmt: 
+
+program:
+  |  d = list(topdecl)            {PROG(d)}
+  |  EOF                          {Prog([])}
+;
+
+topdecl:
+  | v = varDecl  SEMI {v}
+  | f =  funDecl      {f}
+;
+
+varDecl:
+  | t = vartyp i = ID                                       {Vardec(t, i)}
+  | t= vartyp TIMES i = ID                                  {Vardec{TypP(t), i}}
+  | t = vartyp LPAREN i = ID RPAREN                         {Vardec(t, i)}
+  | t = vartyp i = id LBRACKET i = option(INTEGER) RBRACKET {Vardec(TypA(t,i))}
+;
+
+funDecl:
+  | t = funtyp i = ID LPAREN p = params RPAREN b = block    {Fundecl({typ=t, fname=i,formals = p, body=b})}       
+;
+params:
+  |                                 {[]}
+  | p = varDecl                     {[p]}
+  | p = varDecl COMMA ps = params   {p::ps}
+;
+
+block: 
+  |LBRACE ss = statements RBRACE   {Block(ss)}
+  ;
+statements:
+  |                           {[]}
+  | s = stmt ss = statements  {s::ss}
+;
+
+stmt:
+  | v = varDecl SEMI                {v}
     RETURN e = expr SEMI            {Return(Some e)}
   | RETURN SEMI                     {Return(None)}
   | e = expr SEMI                   {e}
   | LBRACE b = block RBRACE         {b} 
+  | WHILE LPAREN e = expr RPAREN b = Block  {While(e,b)}
+  | IF LPAREN e = expr RPAREN s = stmt {If(e,s,Block[])}
+  | IF LPAREN e = expr RPAREN s = stmt ELSE s2 = stmt {If(e,s, s2)}
   | FOR LPAREN e1 = expr SEMI e2 = expr SEMI e3 = expr RPAREN b = block {}
-
+;
 expr:
     e = rexpr {e}
   | e = lexpr {e}
@@ -82,6 +117,7 @@ lexpr:
 
 rexpr:
     a = aexpr                                               {a}
+  | i = ID LPAREN a = fargs RPAREN                          {Call(i, a)}
   | el = lexpr ASSIGN e = expr                              {Assign(AccVar(id), e)}
   | e1 = expr PLUS e2 = expr                                {BinaryOP(Add, e1, e2)}
   | e1 = expr MINUS e2 = expr                               {BinaryOP(Sub, e1, e2)}
@@ -99,7 +135,7 @@ rexpr:
   | MINUS e = expr                                          {UnaryOp(Neg, e)}
   | NOT e = expr                                            {UnaryOp(Not, e)}
   | id = ID LPAREN  
-
+;
 aexpr:
     i = INTEGER                                             {ILiteral(i)}
   | c = CHAR                                                {CLiteral(c)}
@@ -108,3 +144,9 @@ aexpr:
   | NULL                                                    {Addr(Accderef(-1))}                                                  {BLiteral(false)}
   | LPAREN r = rexpr RPAREN                                 {r}
   | ADDRESS l = lexpr                                       {Addr(Accderef(l))}
+;
+fargs:
+  | {[]}
+  | e = expr {[e]}
+  | e = expr COMMA f = fargs {e::f}
+;
