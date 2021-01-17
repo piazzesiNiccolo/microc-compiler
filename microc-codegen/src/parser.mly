@@ -26,7 +26,7 @@
 /* Precedence and associativity specification */
 %right EQ
 %left OR
-%left and
+%left AND 
 %left EQ NEQ
 %nonassoc GT LT GEQ LEQ
 %left PLUS MINUS TIMES DIVIDE MOD
@@ -44,16 +44,16 @@
 /* Grammar specification */
 
 vartyp:
-    INT   {TypI}
+  |  INT   {TypI}
   | CHAR  {TypC}
   | BOOL  {TypB}
-
+;
 funtyp:
-    INT   {TypI}
+  |  INT   {TypI}
   | CHAR  {TypC}
   | BOOL  {TypB}
   | VOID  {TypV}
-
+;
 
 program:
   |  d = list(topdecl)            {PROG(d)}
@@ -83,7 +83,7 @@ params:
 
 block: 
   |LBRACE ss = statements RBRACE   {Block(ss)}
-  ;
+;
 statements:
   |                           {[]}
   | s = stmt ss = statements  {s::ss}
@@ -91,7 +91,7 @@ statements:
 
 stmt:
   | v = varDecl SEMI                {v}
-    RETURN e = expr SEMI            {Return(Some e)}
+  |  RETURN e = expr SEMI           {Return(Some e)}
   | RETURN SEMI                     {Return(None)}
   | e = expr SEMI                   {e}
   | LBRACE b = block RBRACE         {b} 
@@ -101,13 +101,13 @@ stmt:
   | FOR LPAREN e1 = expr SEMI e2 = expr SEMI e3 = expr RPAREN b = block {}
 ;
 expr:
-    e = rexpr {e}
+  |  e = rexpr {e}
   | e = lexpr {e}
 ;
 
 
 lexpr:
-    id = ID                                                 {Access(AccVar(id))}
+  |  id = ID                                                 {Access(AccVar(id))}
   | LPAREN e = lexpr RPAREN                                 {e}
   | TIMES e1 = lexpr                                        {Access(Accderef(expr))}
   | TIMES e = aexpr                                         {Access(Accderef(e))}
@@ -116,7 +116,7 @@ lexpr:
 
 
 rexpr:
-    a = aexpr                                               {a}
+  | a = aexpr                                               {a}
   | i = ID LPAREN a = fargs RPAREN                          {Call(i, a)}
   | el = lexpr ASSIGN e = expr                              {Assign(AccVar(id), e)}
   | e1 = expr PLUS e2 = expr                                {BinaryOP(Add, e1, e2)}
@@ -136,15 +136,17 @@ rexpr:
   | NOT e = expr                                            {UnaryOp(Not, e)}
   | id = ID LPAREN  
 ;
+
 aexpr:
-    i = INTEGER                                             {ILiteral(i)}
+  | i = INTEGER                                             {ILiteral(i)}
   | c = CHAR                                                {CLiteral(c)}
   | TRUE                                                    {BLiteral(true)}
   | FALSE                                                   {BLiteral(false)}
-  | NULL                                                    {Addr(Accderef(-1))}                                                  {BLiteral(false)}
+  | NULL                                                    {Addr(Accderef(-1))}                                              
   | LPAREN r = rexpr RPAREN                                 {r}
   | ADDRESS l = lexpr                                       {Addr(Accderef(l))}
 ;
+
 fargs:
   | {[]}
   | e = expr {[e]}
