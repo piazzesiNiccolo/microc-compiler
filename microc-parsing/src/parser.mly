@@ -14,7 +14,7 @@
 %token IF RETURN ELSE FOR WHILE INT CHAR VOID NULL BOOL
 %token PLUS MINUS TIMES DIVIDE MOD 
 %token AND OR EQ NEQ NOT GT LT GEQ LEQ
-%token  ADDRESS ASSIGN
+%token ADDRESS ASSIGN
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token COMMA SEMI
 %token <string>ID
@@ -44,15 +44,13 @@
 /* Grammar specification */
 
 vartyp:
-  |  INT   {TypI}
+  | INT   {TypI}
   | CHAR  {TypC}
   | BOOL  {TypB}
 ;
 funtyp:
-  |  INT   {TypI}
-  | CHAR  {TypC}
-  | BOOL  {TypB}
-  | VOID  {TypV}
+  | t = vartyp  {t}
+  | VOID        {TypV}
 ;
 
 program:
@@ -69,7 +67,7 @@ varDecl:
   | t = vartyp i = ID                                       {Vardec(t, i)}
   | t= vartyp TIMES i = ID                                  {Vardec(TypP(t), i)}
   | t = vartyp LPAREN i = ID RPAREN                         {Vardec(t, i)}
-  | t = vartyp i = ID LBRACKET n = option(int) RBRACKET {Vardec(TypA(t,i), n)}
+  | t = vartyp i = ID LBRACKET n = option(INTEGER) RBRACKET {Vardec(TypA(t,n), i)}
 ;
 
 funDecl:
@@ -91,7 +89,7 @@ statements:
 
 stmt:
   | v = varDecl SEMI                {v}
-  |  RETURN e = expr SEMI           {Return(Some e)}
+  | RETURN e = expr SEMI            {Return(Some e)}
   | RETURN SEMI                     {Return(None)}
   | e = expr SEMI                   {e}
   | LBRACE b = block RBRACE         {b} 
@@ -99,10 +97,9 @@ stmt:
   (* ADD FOR *)
   | IF LPAREN e = expr RPAREN s = stmt {If(e,s,Block([]))}
   | IF LPAREN e = expr RPAREN s = stmt ELSE s2 = stmt {If(e,s,s2)}
-  | FOR LPAREN e1 = expr SEMI e2 = expr SEMI e3 = expr RPAREN b = block {}
-;
+  
 expr:
-  |  e = rexpr {e}
+  | e = rexpr {e}
   | e = lexpr {e}
 ;
 
