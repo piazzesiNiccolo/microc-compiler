@@ -1,5 +1,6 @@
 TARGET=microcc
 
+
 default: $(TARGET).native
 
 $TARGET: default
@@ -14,3 +15,6 @@ clean:
 	ocamlbuild -clean
 
 .PHONY: clean default
+
+
+scan_test: scan_test.native

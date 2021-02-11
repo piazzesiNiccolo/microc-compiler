@@ -1,2 +1,2 @@
-<src/**>: include, package(menhirLib), package(ppx_deriving.std)
+<src/**>: include, package(menhirLib), package(ppx_deriving.std), package(easy_logging)
 true: use_menhir

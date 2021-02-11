@@ -34,7 +34,7 @@ let digit = ['0' - '9']
 let id = ['_' 'a'-'z' 'A'-'Z']['_' 'a'-'z' '0'-'9']*
 
 rule token = parse
-    [' ' '\t' '\r' '\n'] { logger#debug "white space" token lexbuf }
+    [' ' '\t' '\r' '\n'] { logger#debug "white space"; token lexbuf }
     | id as word {try
                   let kw = Hashtbl.find keywords word in
                   logger#debug "Token %s" word;
@@ -44,11 +44,11 @@ rule token = parse
                   ID(word)
                  }
     | digit+ as integer {logger#debug "number"; INTEGER(int_of_string integer)}
-    | "true" {logger#debug "true" TRUE}
-    | "false"{logger#debugv"false" FALSE}
-    | '\''['a'-'z''A'-'Z''0'-'9'] '\'' as c {logger#debug "single char" CHARLIT(c)}
-    | "//" {logger#debug "singleline comment"singlelinecomment lexbuf}
-    | "/*" {logger#debug "multiline comment" multilinecomment lexbuf}
+    | "true" {logger#debug "true"; TRUE}
+    | "false"{logger#debug "false"; FALSE}
+    |   '\''  as c {logger#debug "single char"; charLiteral lexbuf}
+    | "//" {logger#debug "singleline comment"; singlelinecomment lexbuf}
+    | "/*" {logger#debug "multiline comment";  multilinecomment lexbuf}
     | '(' {logger#debug "LPAREN"; LPAREN}
     | ')' {logger#debug "RPAREN"; RPAREN}
     | '{' {logger#debug "LBRACE"; LBRACE}
@@ -66,7 +66,7 @@ rule token = parse
     | "==" {logger#debug "EQ ";EQ}
     | "!=" {logger#debug "NEQ"; NEQ}
     | '<' {logger#debug "LT"; LT}
-    | '>' {logger#debug "GT" GT}
+    | '>' {logger#debug "GT"; GT}
     | "<=" {logger#debug "LEQ"; LEQ}
     | ">=" {logger#debug "GEQ"; GEQ}
     | '!' {logger#debug "NOT"; NOT}
@@ -76,10 +76,13 @@ rule token = parse
     | eof   {logger#debug "eof"; EOF}
     | _ as c           { Util.raise_lexer_error lexbuf ("Illegal character " ^ Char.escaped c) }
 
+and charLiteral = parse
+    ['a'-'z''A'-'Z''0'-'9'] as c {CHARLIT(c)}
+    | '\''      {token lexbuf}
 and singlelinecomment = parse
     "\n" {token lexbuf}
-    | _ {comment lexbuf}
+    | _ {singlelinecomment lexbuf}
 
 and multilinecomment = parse
     "*/" {token lexbuf}
-    | _ { comment lexbuf}
+    | _ { multilinecomment lexbuf}
