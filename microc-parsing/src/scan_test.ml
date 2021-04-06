@@ -1,6 +1,4 @@
 open Scanner
-open Parser_engine
-open Parser
 let  rec scan lexbuf = match Scanner.token lexbuf with
 | EOF -> Printf.printf "ciao"
 | _ -> scan lexbuf
@@ -10,7 +8,7 @@ let () =
   let in_channel = open_in filename in 
   let lexbuf = Lexing.from_channel in_channel ~with_positions:true in
   scan lexbuf;
-
+  
   
 
 
