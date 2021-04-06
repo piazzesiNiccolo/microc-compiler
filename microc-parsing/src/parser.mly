@@ -3,8 +3,13 @@
 */
 
 %{
-    open Ast
-    open Easy_logging
+        open Ast
+        open Easy_logging 
+        open Lexing
+        open Util
+        open Lexing
+
+        
     
     (* Define here your utility functions *)
     let log = Logging.make_logger  "Parser" Debug [Cli Debug];;
@@ -50,8 +55,7 @@
 
 
 program:
-  |  p = list(topdec)     {Prog d}
-  |  EOF                  {Prog [] }
+        |  p = list(topdec) EOF     {Prog d}                
 ;
 
 typ:
@@ -76,8 +80,7 @@ topdec:
 
 formals:
 | {logger#debug " no argumnts\n"; []}
-| t=typ i = ID {logger#debug "single argument"; [(t,i)]} 
-| t=typ i =ID COMMA f = formals {logger#debug "multiple arguments"; (t,i)::f}
+| f = separated_list(COMMA, vardec) {logger#debug "multiple arguments"; f::fs}
 ;
 
 block:
