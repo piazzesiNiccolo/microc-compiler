@@ -1,4 +1,7 @@
 open Ast
+open Scanner
+open Parser_engine
+open Util
 let () =
 
   if Array.length (Sys.argv) == 2 then

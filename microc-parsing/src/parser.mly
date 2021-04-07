@@ -62,19 +62,19 @@ typ:
 ;
 
 topdec:
-| v = vardecl COMMA {}
+| v = vardecl SEMI {create Vardec(fst v, snd v) $loc}
 | f = fundecl {create Fundecl(f) $loc}
 ;
 
 vardecl:
-| t = typ v = vardesc {}
+| t = typ v = vardesc {((fst v) t, snd v)}
 ;
 
 vardesc:
-| i = ID  {}
-| TIMES v = vardesc {}
-| LPAREN v = vardesc RPAREN {}
-| v = vardesc LBRACKET n = option(INT) RBRACKET {}
+| i = ID  {((fun t -> t), i)} 
+| TIMES v = vardesc {((fun t->TypP(t)) |> (fst v), snd v )}(*WRONG*)
+| LPAREN v = vardesc RPAREN {v}
+| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t->TypA(t,n)) |> (fst v), snd v )}(*WRONG*)
 ;
 
 fundecl:
@@ -83,19 +83,29 @@ fundecl:
 ;
 
 block:
-| LBRACE c=list(stmtordecl) RBRACE { create Block(c) $loc}
+| LBRACE c=list(stmtordec) RBRACE { create Block(c) $loc}
 ;
 
 stmtordec:
 | s = statement {create Stmt(s) $loc}
-| v = vardecl COMMA {}
+| v = vardecl SEMI {create Dec(fst v, snd v) $loc}
 ;
-statement:
-| RETURN e = option(expr) COMMA {create Return(e) $loc}
-| e = expr COMMA {create Expr(e) $loc}
+statement: 
+| RETURN e = option(expr) SEMI {create Return(e) $loc}
+| e = expr SEMI {create Expr(e) $loc}
 | b = block {b}
-| WHILE LPAREN e = expr RPAREN b = block {create While(e, b) $loc}
-| FOR LPAREN init = expr COMMA ext_cond = expr COMMA incr=expr RPAREN b = block {}
+| WHILE LPAREN e = expr RPAREN s=statement {create While(e, s) $loc}
+| FOR LPAREN init = expr SEMI ext_cond = expr SEMI incr=expr RPAREN s=statement
+{
+ create Block([create Stmt(create Expr(init) $loc) $loc;
+              create Stmt(
+                  create While(ext_cond,
+                    create Block([create Stmt(s) $loc;create Stmt(incr) $loc]) $loc) 
+                  $loc) 
+              $loc;
+              ]) 
+  $loc
+}
 | IF LPAREN cond=expr RPAREN s=statement ELSE s2 = statement 
   {create If(cond,s,s2) $loc}
 | IF LPAREN cond=expr RPAREN s=statement  
