@@ -8,8 +8,8 @@
         
     
     (* Define here your utility functions *)
-    let log = Logging.make_logger  "Parser" Debug [Cli Debug];;
-    let create loc node = {loc = loc; node = node; id=0};;
+    let log = Logging.make_logger  "Parser" Debug [Cli Debug]
+    let create nd loc = {loc = loc; node = nd; id=0}
 
 
 %}
@@ -54,84 +54,83 @@ program:
   | p = list(topdec) EOF     {Prog p}                
 ;
 
+
+
+topdec:
+| v = vardecl SEMI {create (Vardec(fst v, snd v)) $loc}
+| t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
+  {create (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
+;
+
 typ:
   | INT {TypI}
   | CHAR {TypC}
   | BOOL {TypB}
   | VOID {TypV}
 ;
-
-topdec:
-| v = vardecl SEMI {create Vardec(fst v, snd v) $loc}
-| f = fundecl {create Fundecl(f) $loc}
-;
-
 vardecl:
 | t = typ v = vardesc {((fst v) t, snd v)}
 ;
 
 vardesc:
 | i = ID  {((fun t -> t), i)} 
-| TIMES v = vardesc {((fun t->TypP(t)) |> (fst v), snd v )}(*WRONG*)
+| TIMES v = vardesc %prec ADDRESS {((fun t->TypP((fst v) t)) , snd v )}
 | LPAREN v = vardesc RPAREN {v}
-| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t->TypA(t,n)) |> (fst v), snd v )}(*WRONG*)
+| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t -> TypA((fst v) t,n)), snd v) }
 ;
 
-fundecl:
-| t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
-  {{typ=t; fname=i; formals=fs; body=b}}
-;
+
 
 block:
-| LBRACE c=list(stmtordec) RBRACE { create Block(c) $loc}
+| LBRACE c=list(stmtordec) RBRACE { create (Block(c)) $loc}
 ;
 
 stmtordec:
-| s = statement {create Stmt(s) $loc}
-| v = vardecl SEMI {create Dec(fst v, snd v) $loc}
+| s = statement {create (Stmt(s)) $loc}
+| v = vardecl SEMI {create (Dec(fst v, snd v)) $loc}
 ;
 statement: 
-| RETURN e = option(expr) SEMI {create Return(e) $loc}
-| e = expr SEMI {create Expr(e) $loc}
+| RETURN e = option(expr) SEMI {create (Return(e)) $loc}
+| e = expr SEMI {create (Expr(e)) $loc}
 | b = block {b}
-| WHILE LPAREN e = expr RPAREN s=statement {create While(e, s) $loc}
+| WHILE LPAREN e = expr RPAREN s=statement {create (While(e, s)) $loc}
 | FOR LPAREN init = expr SEMI ext_cond = expr SEMI incr=expr RPAREN s=statement
 {
- create Block([create Stmt(create Expr(init) $loc) $loc;
-              create Stmt(
-                  create While(ext_cond,
-                    create Block([create Stmt(s) $loc;create Stmt(incr) $loc]) $loc) 
-                  $loc) 
+ create (Block([create (Stmt(create (Expr(init)) $loc)) $loc;
+              create (Stmt(
+                  create (While(ext_cond,
+                    create (Block([create (Stmt(s)) $loc;create (Stmt(create (Expr(incr))  $loc)) $loc])) $loc)) 
+                  $loc)) 
               $loc;
-              ]) 
+              ])) 
   $loc
 }
 | IF LPAREN cond=expr RPAREN s=statement ELSE s2 = statement 
-  {create If(cond,s,s2) $loc}
+  {create (If(cond,s,s2)) $loc}
 | IF LPAREN cond=expr RPAREN s=statement  
-  {create If(cond,s,Block([])) $loc}  
+  {create (If(cond,s,create (Block([])) $loc)) $loc}  
 ;
 
 expr:
 | r = rexpr {r}
-| l = lexpr {create Access(l) $loc}
+| l = lexpr {create (Access(l)) $loc}
 ;
 
 lexpr:
-| i = ID {create AccVar(i) $loc}
+| i = ID {create (AccVar(i)) $loc}
 | LPAREN l = lexpr RPAREN {l}
-| TIMES l = lexpr {create AccDeref(create Access(l) $loc) $loc}
-| l=lexpr LBRACKET e = expr RBRACKET { create AccIndex(l,e) $loc}
+| TIMES l = lexpr {create (AccDeref(create (Access(l)) $loc)) $loc}
+| l=lexpr LBRACKET e = expr RBRACKET { create (AccIndex(l,e)) $loc}
 ;
 
 rexpr:
 | a = aexpr {a}
 | i = ID LPAREN p=separated_list(COMMA,expr) RPAREN 
-  {create Call(i,p) $loc}
-| l = lexpr ASSIGN e = expr {create Assign(l, e) $loc}
-| NOT e=expr {create UnaryOp(Not, e) $loc}
-| MINUS e=expr {create UnaryOp(Neg, e) $loc}
-| e=expr b=binOp e2=expr {create BinaryOp(b,e,e2) $loc}
+  {create (Call(i,p)) $loc}
+| l = lexpr ASSIGN e = expr {create (Assign(l, e)) $loc}
+| NOT e=expr {create (UnaryOp(Not, e)) $loc}
+| MINUS e=expr {create (UnaryOp(Neg, e)) $loc}
+| e=expr b=binOp e2=expr {create (BinaryOp(b,e,e2)) $loc}
 ;
 binOp:
 | PLUS  {Add}
@@ -151,16 +150,16 @@ binOp:
 
 aexpr:
 | i=INTEGER 
-  {create ILiteral(i) $loc}
+  {create (ILiteral(i)) $loc}
 | c=CHARLIT 
-  {create CLiteral(c) $loc}
+  {create (CLiteral(c)) $loc}
 | TRUE 
-  {create BLiteral(true) $loc}
+  {create (BLiteral(true)) $loc}
 | FALSE 
-  {create BLiteral(false) $loc}
+  {create (BLiteral(false)) $loc}
 | NULL 
-  {create Access(create AccVar("NULL") $loc ) $loc}
+  {create (Access(create (AccVar("NULL")) $loc )) $loc}
 | LPAREN r=rexpr RPAREN 
   {r}
 | ADDRESS l=lexpr 
-  {create Addr(l) $loc}
+  {create (Addr(l)) $loc}

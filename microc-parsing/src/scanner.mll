@@ -24,7 +24,7 @@
        let logger = Logging.make_logger "Scanner" Debug [Cli Debug];;
 }
 let digit = ['0' - '9']
-let id = ['_' 'a'-'z' 'A'-'Z']['_' 'a'-'z' '0'-'9']*
+let id = ['_' 'a'-'z' 'A'-'Z']['_' 'a'-'z' 'A'-'Z' '0'-'9']*
 let newline = '\r'|'\n'|"\r\n"
 let ws = [' ' '\t']
 rule token = parse
