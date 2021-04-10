@@ -1,15 +1,29 @@
  %{
         open Ast
-        open Easy_logging 
         open Lexing
         open Util
         open Lexing
 
         
     
-    (* Define here your utility functions *)
-    let log = Logging.make_logger  "Parser" Debug [Cli Debug]
-    let create nd loc = {loc = loc; node = nd; id=0}
+
+        let create nd loc = {loc = loc; node = nd; id=0}
+        (* utility functions to convert a for to a while *)        
+        let for_opt_init e loc =
+          match e with
+          | Some(x) -> create (Stmt(create (Expr(x)) loc)) loc
+          | None -> create (Stmt(create (Block([])) loc)) loc
+        
+        
+        let for_opt_cond e loc =
+          match e with
+          | Some(x) -> x
+          | None -> create (BLiteral(true)) loc
+
+        let for_opt_incr e loc =
+          match e with
+          | Some(x) -> create (Stmt(create (Expr(x)) loc)) loc
+          | None -> create (Stmt( create (Block([])) loc)) loc
 
 
 %}
@@ -94,12 +108,12 @@ statement:
 | e = expr SEMI {create (Expr(e)) $loc}
 | b = block {b}
 | WHILE LPAREN e = expr RPAREN s=statement {create (While(e, s)) $loc}
-| FOR LPAREN init = expr SEMI ext_cond = expr SEMI incr=expr RPAREN s=statement
+| FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
 {
- create (Block([create (Stmt(create (Expr(init)) $loc)) $loc;
+ create (Block([for_opt_init init $loc;
               create (Stmt(
-                  create (While(ext_cond,
-                    create (Block([create (Stmt(s)) $loc;create (Stmt(create (Expr(incr))  $loc)) $loc])) $loc)) 
+                  create (While(for_opt_cond ext_cond $loc,
+                    create (Block([create (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
                   $loc)) 
               $loc;
               ])) 
