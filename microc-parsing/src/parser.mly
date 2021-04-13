@@ -43,6 +43,8 @@
 %token EOF
 
 /* Precedence and associativity specification */
+%nonassoc NOELSE
+%nonassoc ELSE
 %right ASSIGN
 %left OR
 %left AND 
@@ -119,10 +121,13 @@ statement:
               ])) 
   $loc
 }
-| IF LPAREN cond=expr RPAREN s=statement ELSE s2 = statement 
-  {create (If(cond,s,s2)) $loc}
-| IF LPAREN cond=expr RPAREN s=statement  
-  {create (If(cond,s,create (Block([])) $loc)) $loc}  
+| IF LPAREN cond=expr RPAREN s=statement e=elseblock
+  {create (If(cond,s,e)) $loc}
+;
+
+elseblock:
+  | %prec NOELSE{create (Block([])) $loc}
+  | ELSE st=statement {st}
 ;
 
 expr:
@@ -146,7 +151,8 @@ rexpr:
 | MINUS e=expr {create (UnaryOp(Neg, e)) $loc}
 | e=expr b=binOp e2=expr {create (BinaryOp(b,e,e2)) $loc}
 ;
-binOp:
+(*binop is inline in order to not have shift reduce conflicts*)
+%inline binOp:
 | PLUS  {Add}
 | MINUS   {Sub}
 | TIMES   {Mult}
