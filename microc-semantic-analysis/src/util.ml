@@ -2,6 +2,11 @@ exception Syntax_error of string
 exception Lexing_error of string
 exception Semantic_error of string
 
+let prelude = [ (*definitions of external libraries, to be used in symbol tables
+during semantic checking and code generation*)
+  "print", Ast.TypV,[Ast.TypI]
+; "getint", Ast.TypI,[]
+]
 let get_lexing_position lexbuf =
   let p = Lexing.lexeme_start_p lexbuf in
   let line_number = p.Lexing.pos_lnum in

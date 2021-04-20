@@ -1,2 +1,5 @@
+open Parser
+open Scanner
 let parse lexbuf =
-  failwith "Not implemented yet"
+  Parser.program Scanner.token lexbuf
+  

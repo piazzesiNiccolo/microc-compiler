@@ -2,7 +2,7 @@ exception DuplicateEntry
 
 type 'a t = Empty_table | Table of 'a t * (string,'a) Hashtbl.t
 
-let empty_table = Empty_table
+let empty_table = Empty_table 
 
 let begin_block table = 
   match table with
