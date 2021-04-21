@@ -13,22 +13,26 @@ type symbols = {fun_symbols: fun_info Symbol_table.t ;
                 var_symbols: var_info Symbol_table.t
                 }
 
-
+let check_func f scope loc =
+  try
+    Symbol_table.add_entry f.fname (Declaration(loc, f)) scope.fun_symbols |> ignore 
+  with 
+    Symbol_table.DuplicateEntry ->  "function "^ f.fname ^ " already defined" |> Util.raise_semantic_error loc 
+  
 let check_topdecl scope node = 
   match node.node with
-  |Fundecl(f) -> Symbol_table.add_entry f.fname (Declaration(node.loc, f)) scope.fun_symbols |> ignore
+  |Fundecl(f) ->  check_func f scope node.loc
+                
   |Vardec(t,i) -> Symbol_table.add_entry i (node.loc, t) scope.var_symbols |> ignore
 
 let dummy = Lexing.dummy_pos, Lexing.dummy_pos
 let check_global_properties scope =
-  try 
   let m =  Symbol_table.lookup "main" scope.fun_symbols in 
   match m with
-  | Declaration(_,{typ=TypV;fname="main";formals=[]}) -> ignore
-  | Declaration(_,{typ=TypI;fname="main";formals=[]}) -> ignore
-  | _ -> Util.raise_semantic_error dummy "Invalid signature of main"
-with 
-  | Not_found -> Util.raise_semantic_error dummy " No main function defined"
+  | Some Declaration(_,{typ=TypV;fname="main";formals=[]}) -> ignore
+  | Some Declaration(_,{typ=TypI;fname="main";formals=[]}) -> ignore
+  | Some _ -> Util.raise_semantic_error dummy "Invalid signature of main"
+  | None -> Util.raise_semantic_error dummy " No main function defined"
 
   let prelude_functions =
   let init_scope = Symbol_table.empty_table |> Symbol_table.begin_block in 
@@ -36,9 +40,8 @@ with
   init_scope
 
   let check (Prog(topdecls)) = 
-    let toplevel_scope = {
-    fun_symbols = prelude_functions;
-    var_symbols = Symbol_table.empty_table
-  }
-    in List.iter (check_topdecl toplevel_scope) topdecls;
-      check_global_properties toplevel_scope 
+      let toplevel_scope = {
+        fun_symbols = prelude_functions;
+        var_symbols = Symbol_table.empty_table |> Symbol_table.begin_block
+      }
+      in List.iter (check_topdecl toplevel_scope) topdecls;check_global_properties toplevel_scope |> ignore 

@@ -24,9 +24,9 @@ let add_entry symbol info table =
 
 let rec lookup symbol table = 
       match table with
-      | Empty_table -> raise Not_found
+      | Empty_table -> None
       | Table(p,t) ->
         match Hashtbl.find_opt t symbol with
         | None -> lookup symbol p
-        | Some(v) -> v 
+        | Some(v) -> Some(v)
 
