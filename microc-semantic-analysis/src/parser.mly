@@ -7,23 +7,23 @@
         
     
 
-        let create nd loc = {loc = loc; node = nd; id=0}
+        let node nd loc = {loc = loc; node = nd; id=0}
         (* utility functions to convert a for to a while *)        
         let for_opt_init e loc =
           match e with
-          | Some(x) -> create (Stmt(create (Expr(x)) loc)) loc
-          | None -> create (Stmt(create (Block([])) loc)) loc
+          | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+          | None -> node (Stmt(node (Block([])) loc)) loc
         
         
         let for_opt_cond e loc =
           match e with
           | Some(x) -> x
-          | None -> create (BLiteral(true)) loc
+          | None -> node (BLiteral(true)) loc
 
         let for_opt_incr e loc =
           match e with
-          | Some(x) -> create (Stmt(create (Expr(x)) loc)) loc
-          | None -> create (Stmt( create (Block([])) loc)) loc
+          | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+          | None -> node (Stmt( node (Block([])) loc)) loc
 
 
 %}
@@ -73,9 +73,9 @@ program:
 
 
 topdec:
-| v = vardecl SEMI {create (Vardec(fst v, snd v)) $loc}
+| v = vardecl SEMI {node (Vardec(fst v, snd v)) $loc}
 | t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
-  {create (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
+  {node (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
 ;
 
 typ:
@@ -98,58 +98,58 @@ vardesc:
 
 
 block:
-| LBRACE c=list(stmtordec) RBRACE { create (Block(c)) $loc}
+| LBRACE c=list(stmtordec) RBRACE { node (Block(c)) $loc}
 ;
 
 stmtordec:
-| s = statement {create (Stmt(s)) $loc}
-| v = vardecl SEMI {create (Dec(fst v, snd v)) $loc}
+| s = statement {node (Stmt(s)) $loc}
+| v = vardecl SEMI {node (Dec(fst v, snd v)) $loc}
 ;
 statement: 
-| RETURN e = option(expr) SEMI {create (Return(e)) $loc}
-| e = expr SEMI {create (Expr(e)) $loc}
+| RETURN e = option(expr) SEMI {node (Return(e)) $loc}
+| e = expr SEMI {node (Expr(e)) $loc}
 | b = block {b}
-| WHILE LPAREN e = expr RPAREN s=statement {create (While(e, s)) $loc}
+| WHILE LPAREN e = expr RPAREN s=statement {node (While(e, s)) $loc}
 | FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
 {
- create (Block([for_opt_init init $loc;
-              create (Stmt(
-                  create (While(for_opt_cond ext_cond $loc,
-                    create (Block([create (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
+ node (Block([for_opt_init init $loc;
+              node (Stmt(
+                  node (While(for_opt_cond ext_cond $loc,
+                    node (Block([node (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
                   $loc)) 
               $loc;
               ])) 
   $loc
 }
 | IF LPAREN cond=expr RPAREN s=statement e=elseblock
-  {create (If(cond,s,e)) $loc}
+  {node (If(cond,s,e)) $loc}
 ;
 
 elseblock:
-  | %prec NOELSE{create (Block([])) $loc}
+  | %prec NOELSE{node (Block([])) $loc}
   | ELSE st=statement {st}
 ;
 
 expr:
 | r = rexpr {r}
-| l = lexpr {create (Access(l)) $loc}
+| l = lexpr {node (Access(l)) $loc}
 ;
 
 lexpr:
-| i = ID {create (AccVar(i)) $loc}
+| i = ID {node (AccVar(i)) $loc}
 | LPAREN l = lexpr RPAREN {l}
-| TIMES l = lexpr {create (AccDeref(create (Access(l)) $loc)) $loc}
-| l=lexpr LBRACKET e = expr RBRACKET { create (AccIndex(l,e)) $loc}
+| TIMES l = lexpr {node (AccDeref(node (Access(l)) $loc)) $loc}
+| l=lexpr LBRACKET e = expr RBRACKET { node (AccIndex(l,e)) $loc}
 ;
 
 rexpr:
 | a = aexpr {a}
 | i = ID LPAREN p=separated_list(COMMA,expr) RPAREN 
-  {create (Call(i,p)) $loc}
-| l = lexpr ASSIGN e = expr {create (Assign(l, e)) $loc}
-| NOT e=expr {create (UnaryOp(Not, e)) $loc}
-| MINUS e=expr {create (UnaryOp(Neg, e)) $loc}
-| e=expr b=binOp e2=expr {create (BinaryOp(b,e,e2)) $loc}
+  {node (Call(i,p)) $loc}
+| l = lexpr ASSIGN e = expr {node (Assign(l, e)) $loc}
+| NOT e=expr {node (UnaryOp(Not, e)) $loc}
+| MINUS e=expr {node (UnaryOp(Neg, e)) $loc}
+| e=expr b=binOp e2=expr {node (BinaryOp(b,e,e2)) $loc}
 ;
 (*binop is inline in order to not have shift reduce conflicts*)
 %inline binOp:
@@ -170,16 +170,16 @@ rexpr:
 
 aexpr:
 | i=INTEGER 
-  {create (ILiteral(i)) $loc}
+  {node (ILiteral(i)) $loc}
 | c=CHARLIT 
-  {create (CLiteral(c)) $loc}
+  {node (CLiteral(c)) $loc}
 | TRUE 
-  {create (BLiteral(true)) $loc}
+  {node (BLiteral(true)) $loc}
 | FALSE 
-  {create (BLiteral(false)) $loc}
+  {node (BLiteral(false)) $loc}
 | NULL 
-  {create (Access(create (AccVar("NULL")) $loc )) $loc}
+  {node (Access(node (AccDeref(node (ILiteral(-1))$loc))$loc)) $loc}
 | LPAREN r=rexpr RPAREN 
   {r}
 | ADDRESS l=lexpr 
-  {create (Addr(l)) $loc}
+  {node (Addr(l)) $loc}

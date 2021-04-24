@@ -19,6 +19,8 @@
         ("void",VOID);
         ("NULL", NULL);
         ("bool",BOOL);
+        ("true",TRUE);
+        ("false",FALSE)
     ]
 }
 let digit = ['0' - '9']
