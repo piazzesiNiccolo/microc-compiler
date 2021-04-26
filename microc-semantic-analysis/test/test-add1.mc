@@ -1,10 +1,14 @@
-int add(int x, int y)
+int add(int* x, int* y)
 {
-  return x + y;
+  return *x + *y;
 }
 
 int main()
 {
-  print( add(17, 25) );
+  int* a;
+  int* b;
+  *a = 25;
+  *b=17;
+  print( add(a, b) );
   return 0;
 }

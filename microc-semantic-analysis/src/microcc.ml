@@ -9,7 +9,7 @@ let () =
     try 
       let (Prog(ds)) as p = Parser_engine.parse lexbuf in 
       Printf.printf "Number of found declarations: %d\n" (List.length ds);
-      Printf.printf "Ast dump\n %s\n" (show_program p);
+      
       Semant.check p;
       Printf.printf "Semantic checks: pass\n"
     with 

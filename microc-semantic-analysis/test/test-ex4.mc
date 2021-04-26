@@ -2,6 +2,14 @@
 
 int a[20];			/* Must be global */
 
+void printarr(int len, int a[]) {
+  int i; 
+  i = 0; 
+  while (i < len) { 
+    print(a[i]); 
+    i=i+1; 
+  } 
+}
 void main(int n) { 
   int i; 
   i = 0; 
@@ -15,11 +23,4 @@ void main(int n) {
   printarr(n, a);
 }
 
-void printarr(int len, int a[]) {
-  int i; 
-  i = 0; 
-  while (i < len) { 
-    print(a[i]); 
-    i=i+1; 
-  } 
-}
+
