@@ -8,7 +8,7 @@
         table
 
     
-    let keywords = create_hashtable 10 [
+    let keywords = create_hashtable 14 [
         ("if", IF);
         ("return",RETURN);
         ("else", ELSE);
@@ -20,11 +20,15 @@
         ("NULL", NULL);
         ("bool",BOOL);
         ("true",TRUE);
-        ("false",FALSE)
+        ("false",FALSE);
+        ("do",DO);
+        ("float",FLOAT)
     ]
 }
 let digit = ['0' - '9']
 let letter = ['a'-'z' 'A'-'Z']
+let exp = ['e' 'E'] ['-' '+']? digit+
+let float = (digit+)('.' digit+)?exp?
 let id = ('_' | letter )('_' | letter | digit)*
 let newline = '\r'|'\n'|"\r\n"
 let ws = [' ' '\t']
@@ -40,6 +44,7 @@ rule token = parse
                   ID(word)
                  }
         | digit+ as integer { INTEGER(int_of_string integer)}
+        | float as fl {FLOATLIT(float_of_string fl)}
         | "true" { TRUE}
         | "false"{ FALSE}
         |   (("'")(([' ' -'~' ]) as c)("'")) { CHARLIT(c)}

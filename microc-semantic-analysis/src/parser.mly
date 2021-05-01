@@ -30,7 +30,7 @@
 
 /* Tokens declarations */
 
-%token IF RETURN ELSE FOR WHILE INT CHAR VOID NULL BOOL
+%token IF RETURN ELSE FOR WHILE DO INT CHAR VOID NULL BOOL FLOAT
 %token PLUS MINUS TIMES DIVIDE MOD 
 %token AND OR EQ NEQ NOT GT LT GEQ LEQ
 %token ADDRESS ASSIGN
@@ -38,6 +38,7 @@
 %token COMMA SEMI
 %token <string>ID
 %token <int>INTEGER
+%token <float> FLOATLIT
 %token <char>CHARLIT
 %token TRUE FALSE
 %token EOF
@@ -73,13 +74,14 @@ program:
 
 
 topdec:
-| v = vardecl SEMI {node (Vardec(fst v, snd v)) $loc}
+| v = vardecl e = option(preceded(ASSIGN,expr)) SEMI {node (Vardec(fst v, snd v,e)) $loc}
 | t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
   {node (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
 ;
 
 typ:
   | INT {TypI}
+  | FLOAT {TypF}
   | CHAR {TypC}
   | BOOL {TypB}
   | VOID {TypV}
@@ -90,9 +92,9 @@ vardecl:
 
 vardesc:
 | i = ID  {((fun t -> t), i)} 
-| TIMES v = vardesc %prec ADDRESS {((fun t->TypP((fst v) t)) , snd v )}
+| TIMES v = vardesc %prec ADDRESS {((fun t->fst v (TypP(t))) , snd v )}
 | LPAREN v = vardesc RPAREN {v}
-| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t -> TypA((fst v) t,n)), snd v) }
+| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t -> fst v (TypA(t,n))), snd v) }
 ;
 
 
@@ -103,12 +105,13 @@ block:
 
 stmtordec:
 | s = statement {node (Stmt(s)) $loc}
-| v = vardecl SEMI {node (Dec(fst v, snd v)) $loc}
+| v = vardecl e = option(preceded(ASSIGN,expr)) SEMI {node (Dec(fst v, snd v,e)) $loc}
 ;
 statement: 
 | RETURN e = option(expr) SEMI {node (Return(e)) $loc}
 | e = expr SEMI {node (Expr(e)) $loc}
 | b = block {b}
+| DO s = statement WHILE LPAREN e = expr RPAREN SEMI {node (DoWhile(e, s)) $loc}
 | WHILE LPAREN e = expr RPAREN s=statement {node (While(e, s)) $loc}
 | FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
 {
@@ -173,6 +176,8 @@ aexpr:
   {node (ILiteral(i)) $loc}
 | c=CHARLIT 
   {node (CLiteral(c)) $loc}
+| f=FLOATLIT
+  {node (FLiteral(f)) $loc}
 | TRUE 
   {node (BLiteral(true)) $loc}
 | FALSE 

@@ -30,6 +30,7 @@ type typ =
   | TypI (* Type int                    *)
   | TypB (* Type bool                   *)
   | TypC (* Type char                   *)
+  | TypF
   | TypA of typ * int option (* Array type                  *)
   | TypP of typ (* Pointer type                *)
   | TypV (* Type void                   *)
@@ -42,6 +43,7 @@ and expr_node =
   | Assign of access * expr (* x=e  or  *p=e  or  a[e]=e   *)
   | Addr of access (* &x   or  &*p   or  &a[e]    *)
   | ILiteral of int (* Integer literal             *)
+  | FLiteral of float 
   | CLiteral of char (* Char literal                *)
   | BLiteral of bool (* Bool literal                *)
   | UnaryOp of uop * expr (* Unary primitive operator    *)
@@ -62,6 +64,7 @@ and stmt = stmt_node annotated_node
 and stmt_node =
   | If of expr * stmt * stmt (* Conditional                 *)
   | While of expr * stmt (* While loop                  *)
+  | DoWhile of expr*stmt
   | Expr of expr (* Expression statement   e;   *)
   | Return of expr option (* Return statement            *)
   | Block of stmtordec list (* Block: grouping and scope   *)
@@ -70,7 +73,7 @@ and stmt_node =
 and stmtordec = stmtordec_node annotated_node
 
 and stmtordec_node =
-  | Dec of typ * identifier (* Local variable declaration  *)
+  | Dec of typ * identifier * expr option (* Local variable declaration  *)
   | Stmt of stmt (* A statement                 *)
 [@@deriving show]
 
@@ -84,7 +87,7 @@ type fun_decl = {
 
 type topdecl = topdecl_node annotated_node
 
-and topdecl_node = Fundecl of fun_decl | Vardec of typ * identifier
+and topdecl_node = Fundecl of fun_decl | Vardec of typ * identifier * expr option
 [@@deriving show]
 
 type program = Prog of topdecl list [@@deriving show]
