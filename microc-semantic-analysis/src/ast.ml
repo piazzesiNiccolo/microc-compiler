@@ -15,7 +15,8 @@ type binop =
   | Comma
 [@@deriving show]
 
-type uop = Neg | Not [@@deriving show]
+type uop = Neg | Not  [@@deriving show]
+
 
 type identifier = string [@@deriving show]
 
@@ -34,6 +35,7 @@ type typ =
   | TypA of typ * int option (* Array type                  *)
   | TypP of typ (* Pointer type                *)
   | TypV (* Type void                   *)
+  | TypNull (*bottom type for null value*)
 [@@deriving show]
 
 and expr = expr_node annotated_node
@@ -46,6 +48,7 @@ and expr_node =
   | FLiteral of float 
   | CLiteral of char (* Char literal                *)
   | BLiteral of bool (* Bool literal                *)
+  | Null
   | UnaryOp of uop * expr (* Unary primitive operator    *)
   | BinaryOp of binop * expr * expr (* Binary primitive operator   *)
   | Call of identifier * expr list (* Function call f(...)        *)

@@ -44,7 +44,7 @@ let check_var_decl scope loc (t, i) =
 
 let check_fun_type loc t =
   match t with
-  | TypA (_, _) | TypP _ ->
+  | TypA (_, _) | TypP _ | TypNull ->
       Util.raise_semantic_error loc
       @@ "cannot define function of type " ^ show_typ t
   | _ -> ()
@@ -53,6 +53,8 @@ let rec match_types t1 t2 =
   match (t1, t2) with
   | TypA (t1, Some v), TypA (t2, Some v2) when v == v2 -> match_types t1 t2
   | TypA (t1, None), TypA (t2, _) -> match_types t1 t2
+  | TypP _, TypNull -> true
+  | TypNull, TypP _ -> true
   | TypP t1, TypP t2 -> match_types t1 t2
   | t1, t2 -> t1 == t2
 
@@ -65,6 +67,8 @@ let binaryexp_type loc op et1 et2 =
   | (Equal | Neq | Less | Leq | Greater | Geq), TypF, TypF -> TypB
   | (Equal | Neq), TypC, TypC -> TypB
   | (Equal | Neq), TypA (t1, _), TypA (t2, _) when match_types t1 t2 -> TypB
+  | (Equal | Neq), TypP _, TypNull -> TypB
+  | (Equal | Neq), TypNull, TypP _ -> TypB
   | (Equal | Neq), TypP t1, TypP t2 when match_types t1 t2 -> TypB
   | (And | Or), TypB, TypB -> TypB
   | _ -> Util.raise_semantic_error loc "Type mismatch on expression"
@@ -76,7 +80,7 @@ let unaryexp_type loc u et =
   | Not, TypB -> TypB
   | Neg, _ ->
       Util.raise_semantic_error loc
-        "Cannot apply minus operator to non int value"
+        "Cannot apply minus operator to non numeric value"
   | Not, _ ->
       Util.raise_semantic_error loc
         "Cannot apply not operator to non boolean value"
@@ -102,6 +106,7 @@ let rec expr_type scope e =
   | CLiteral _ -> TypC
   | FLiteral _ -> TypF
   | BLiteral _ -> TypB
+  | Null -> TypNull
   | UnaryOp (u, e1) ->
       let et = expr_type scope e1 in
       unaryexp_type e.loc u et

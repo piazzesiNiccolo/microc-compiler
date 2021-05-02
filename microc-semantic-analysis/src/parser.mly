@@ -183,7 +183,7 @@ aexpr:
 | FALSE 
   {node (BLiteral(false)) $loc}
 | NULL 
-  {node (Access(node (AccDeref(node (ILiteral(-1))$loc))$loc)) $loc}
+  {node (Null) $loc}
 | LPAREN r=rexpr RPAREN 
   {r}
 | ADDRESS l=lexpr 
