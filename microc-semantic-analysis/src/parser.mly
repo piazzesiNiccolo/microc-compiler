@@ -4,27 +4,25 @@
         open Util
         open Lexing
 
-        
-    
-
         let node nd loc = {loc = loc; node = nd; id=0}
-        (* utility functions to convert a for to a while *)        
+       
+         (* utility functions to convert a for to a while *)         
         let for_opt_init e loc =
-          match e with
-          | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
-          | None -> node (Stmt(node (Block([])) loc)) loc
-        
+              match e with
+              | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+              | None -> node (Stmt(node (Block([])) loc)) loc
+            
         
         let for_opt_cond e loc =
-          match e with
-          | Some(x) -> x
-          | None -> node (BLiteral(true)) loc
-
+              match e with
+              | Some(x) -> x
+              | None -> node (BLiteral(true)) loc
+  
         let for_opt_incr e loc =
-          match e with
-          | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
-          | None -> node (Stmt( node (Block([])) loc)) loc
-
+              match e with
+              | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+              | None -> node (Stmt( node (Block([])) loc)) loc
+        
 
 %}
 
@@ -35,7 +33,9 @@
 %token AND OR EQ NEQ NOT GT LT GEQ LEQ
 %token ADDRESS ASSIGN
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
+%token INCREMENT DECREMENT
 %token COMMA SEMI
+%token SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
 %token <string>ID
 %token <int>INTEGER
 %token <float> FLOATLIT
@@ -46,7 +46,8 @@
 /* Precedence and associativity specification */
 %nonassoc NOELSE
 %nonassoc ELSE
-%right ASSIGN
+
+%right ASSIGN SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
 %left OR
 %left AND 
 %left EQ NEQ
@@ -115,14 +116,14 @@ statement:
 | WHILE LPAREN e = expr RPAREN s=statement {node (While(e, s)) $loc}
 | FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
 {
- node (Block([for_opt_init init $loc;
+    node (Block([for_opt_init init $loc;
               node (Stmt(
                   node (While(for_opt_cond ext_cond $loc,
                     node (Block([node (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
                   $loc)) 
               $loc;
               ])) 
-  $loc
+    $loc
 }
 | IF LPAREN cond=expr RPAREN s=statement e=elseblock
   {node (If(cond,s,e)) $loc}
@@ -150,9 +151,13 @@ rexpr:
 | i = ID LPAREN p=separated_list(COMMA,expr) RPAREN 
   {node (Call(i,p)) $loc}
 | l = lexpr ASSIGN e = expr {node (Assign(l, e)) $loc}
-| NOT e=expr {node (UnaryOp(Not, e)) $loc}
-| MINUS e=expr {node (UnaryOp(Neg, e)) $loc}
-| e=expr b=binOp e2=expr {node (BinaryOp(b,e,e2)) $loc}
+| u=unaryOp e=expr {node (UnaryOp(u, e)) $loc}
+| e=expr b=binOp e2=expr  {node (BinaryOp(b,e,e2)) $loc}
+| l=lexpr s=shortOp e = expr {node (Assign(l , node (BinaryOp(s,node (Access(l)) $loc,e)) $loc) ) $loc}
+| INCREMENT l = lexpr {node (UnaryOp(PreInc,node (Access(l)) $loc )) $loc}
+| DECREMENT l = lexpr {node (UnaryOp(PreDec,node (Access(l)) $loc )) $loc}
+| l  = lexpr INCREMENT {node (UnaryOp(PostInc,node (Access(l)) $loc )) $loc}
+| l  = lexpr DECREMENT {node (UnaryOp(PostDec,node (Access(l)) $loc )) $loc}
 ;
 (*binop is inline in order to not have shift reduce conflicts*)
 %inline binOp:
@@ -171,6 +176,17 @@ rexpr:
 | NEQ {Neq}
 ;
 
+%inline unaryOp:
+| NOT {Not}
+| MINUS {Neg}
+
+%inline shortOp:
+|SHORTADD {Add} 
+|SHORTDIV {Div}
+|SHORTMIN {Sub}
+|SHORTMUL {Mult}
+|SHORTMOD {Mod}
+;
 aexpr:
 | i=INTEGER 
   {node (ILiteral(i)) $loc}

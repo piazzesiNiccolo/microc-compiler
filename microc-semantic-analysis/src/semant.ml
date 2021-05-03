@@ -58,11 +58,10 @@ let rec match_types t1 t2 =
   | TypP t1, TypP t2 -> match_types t1 t2
   | t1, t2 -> t1 == t2
 
-
 let binaryexp_type loc op et1 et2 =
   match (op, et1, et2) with
   | (Add | Sub | Mult | Div | Mod | Comma), TypI, TypI -> TypI
-  | (Add | Sub | Mult | Div | Mod | Comma), TypF, TypF-> TypF
+  | (Add | Sub | Mult | Div | Mod | Comma), TypF, TypF -> TypF
   | (Equal | Neq | Less | Leq | Greater | Geq), TypI, TypI -> TypB
   | (Equal | Neq | Less | Leq | Greater | Geq), TypF, TypF -> TypB
   | (Equal | Neq), TypC, TypC -> TypB
@@ -78,6 +77,11 @@ let unaryexp_type loc u et =
   | Neg, TypI -> TypI
   | Neg, TypF -> TypF
   | Not, TypB -> TypB
+  | (PreInc | PreDec | PostInc | PostDec), (TypI | TypF) -> et
+  | (PreInc | PreDec | PostInc | PostDec), _ ->
+      Util.raise_semantic_error loc
+        "Cannot use operator pre/post increment/decrement with non numeric \
+         value"
   | Neg, _ ->
       Util.raise_semantic_error loc
         "Cannot apply minus operator to non numeric value"
@@ -194,7 +198,6 @@ and check_stmtordec scope ftype s =
         Util.raise_semantic_error s.loc
           "cannot initialize variable with value of different type"
   | Stmt s -> check_stmt scope ftype s
-
 
 let check_parameter scope loc (t, i) =
   check_type loc t;

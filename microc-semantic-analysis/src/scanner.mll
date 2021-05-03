@@ -73,6 +73,13 @@ rule token = parse
         | '!' { NOT}
         | '&' { ADDRESS}
         | "&&" { AND}
+        | "++" {INCREMENT}
+        | "--" {DECREMENT}
+        | "+=" {SHORTADD}
+        | "-=" {SHORTMIN}
+        | "*=" {SHORTMUL}
+        | "/=" {SHORTDIV}
+        | "%=" {SHORTMOD}
         | "||" { OR}
         | eof   { EOF}
         | _ as c           { Util.raise_lexer_error lexbuf ("Illegal character " ^ Char.escaped c) }

@@ -15,7 +15,8 @@ type binop =
   | Comma
 [@@deriving show]
 
-type uop = Neg | Not  [@@deriving show]
+type uop = Neg | Not | PreInc | PreDec | PostInc | PostDec   [@@deriving show]
+
 
 
 type identifier = string [@@deriving show]
