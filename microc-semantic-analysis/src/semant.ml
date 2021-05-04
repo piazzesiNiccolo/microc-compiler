@@ -49,13 +49,14 @@ let check_fun_type loc t =
       @@ "cannot define function of type " ^ show_typ t
   | _ -> ()
 
-let rec match_types t1 t2 =
+let rec match_types loc t1 t2 =
   match (t1, t2) with
-  | TypA (t1, Some v), TypA (t2, Some v2) when v == v2 -> match_types t1 t2
-  | TypA (t1, None), TypA (t2, _) -> match_types t1 t2
+  | TypA (t1, Some v), TypA (t2, Some v2) when v == v2 -> match_types loc t1 t2
+  | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 -> Util.raise_semantic_error loc "Array size must be the same"
+  | TypA (t1, None), TypA (t2, _) -> match_types loc t1 t2
   | TypP _, TypNull -> true
   | TypNull, TypP _ -> true
-  | TypP t1, TypP t2 -> match_types t1 t2
+  | TypP t1, TypP t2 -> match_types loc t1 t2
   | t1, t2 -> t1 == t2
 
 let binaryexp_type loc op et1 et2 =
@@ -65,10 +66,10 @@ let binaryexp_type loc op et1 et2 =
   | (Equal | Neq | Less | Leq | Greater | Geq), TypI, TypI -> TypB
   | (Equal | Neq | Less | Leq | Greater | Geq), TypF, TypF -> TypB
   | (Equal | Neq), TypC, TypC -> TypB
-  | (Equal | Neq), TypA (t1, _), TypA (t2, _) when match_types t1 t2 -> TypB
+  | (Equal | Neq), TypA (t1, _), TypA (t2, _) when match_types loc t1 t2 -> TypB
   | (Equal | Neq), TypP _, TypNull -> TypB
   | (Equal | Neq), TypNull, TypP _ -> TypB
-  | (Equal | Neq), TypP t1, TypP t2 when match_types t1 t2 -> TypB
+  | (Equal | Neq), TypP t1, TypP t2 when match_types loc t1 t2 -> TypB
   | (And | Or), TypB, TypB -> TypB
   | _ -> Util.raise_semantic_error loc "Type mismatch on expression"
 
@@ -99,7 +100,7 @@ let rec expr_type scope e =
           Util.raise_semantic_error e.loc "trying to reassign array"
       | _ ->
           let et = expr_type scope e in
-          if match_types at et then at
+          if match_types e.loc at et then at
           else
             Util.raise_semantic_error e.loc
               "Cannot assign a value of different type")
@@ -110,6 +111,7 @@ let rec expr_type scope e =
   | CLiteral _ -> TypC
   | FLiteral _ -> TypF
   | BLiteral _ -> TypB
+  | String s -> TypA(TypC, Some (String.length s + 1))
   | Null -> TypNull
   | UnaryOp (u, e1) ->
       let et = expr_type scope e1 in
@@ -124,7 +126,7 @@ let rec expr_type scope e =
       | Some (_, f) ->
           let formals_types = List.map (fun (t, i) -> t) f.formals in
           if List.length params_types == List.length formals_types then
-            if List.for_all2 match_types formals_types params_types then f.typ
+            if List.for_all2 (match_types e.loc) formals_types params_types then f.typ
             else Util.raise_semantic_error e.loc "wrong parameter type"
           else
             Util.raise_semantic_error e.loc
@@ -193,7 +195,7 @@ and check_stmtordec scope ftype s =
   | Dec (t, i, Some e) ->
       check_var_decl scope s.loc (t, i);
       let et = expr_type scope e in
-      if match_types t et then ()
+      if match_types s.loc t et then ()
       else
         Util.raise_semantic_error s.loc
           "cannot initialize variable with value of different type"
@@ -225,7 +227,7 @@ let check_func f scope loc =
 
 let rec global_expr_type scope loc e =
   match e.node with
-  | ILiteral _ | CLiteral _ | BLiteral _ -> expr_type scope e
+  | ILiteral _ | CLiteral _ | BLiteral _ | FLiteral _ | String _ -> expr_type scope e
   | UnaryOp (u, e) ->
       let et = global_expr_type scope loc e in
       unaryexp_type loc u et
@@ -244,7 +246,7 @@ let check_topdecl scope node =
   | Vardec (t, i, Some e) ->
       check_var_decl scope node.loc (t, i);
       let et = global_expr_type scope node.loc e in
-      if match_types t et then ()
+      if match_types node.loc t et then ()
       else Util.raise_semantic_error node.loc "Value of different type"
 
 let check_global_properties scope =

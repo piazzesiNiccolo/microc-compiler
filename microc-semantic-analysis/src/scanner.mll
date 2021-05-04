@@ -33,61 +33,78 @@ let id = ('_' | letter )('_' | letter | digit)*
 let newline = '\r'|'\n'|"\r\n"
 let ws = [' ' '\t']
 rule token = parse
-        | ws+       {token lexbuf}
-        | newline+ {Lexing.new_line lexbuf; token lexbuf}
-        | id as word {try
-                  let kw = Hashtbl.find keywords word in
-                  
-                  kw
-                  with Not_found -> 
-                  
-                  ID(word)
-                 }
-        | digit+ as integer { INTEGER(int_of_string integer)}
-        | float as fl {FLOATLIT(float_of_string fl)}
-        | "true" { TRUE}
-        | "false"{ FALSE}
-        |   (("'")(([' ' -'~' ]) as c)("'")) { CHARLIT(c)}
-        | "//" { singlelinecomment lexbuf}
-        | "/*" {  multilinecomment lexbuf}
-        | '(' { LPAREN}
-        | ')' { RPAREN}
-        | '{' { LBRACE}
-        | '}' { RBRACE}
-        | '[' { LBRACKET}
-        | ']' { RBRACKET}
-        | ';' { SEMI}
-        | ',' { COMMA}
-        | '+' { PLUS}
-        | '-' { MINUS}
-        | '*' { TIMES}
-        | '/' { DIVIDE}
-        | '%' { MOD}
-        | '=' { ASSIGN}
-        | "==" {EQ}
-        | "!=" { NEQ}
-        | '<' { LT}
-        | '>' { GT}
-        | "<=" { LEQ}
-        | ">=" { GEQ}
-        | '!' { NOT}
-        | '&' { ADDRESS}
-        | "&&" { AND}
-        | "++" {INCREMENT}
-        | "--" {DECREMENT}
-        | "+=" {SHORTADD}
-        | "-=" {SHORTMIN}
-        | "*=" {SHORTMUL}
-        | "/=" {SHORTDIV}
-        | "%=" {SHORTMOD}
-        | "||" { OR}
-        | eof   { EOF}
-        | _ as c           { Util.raise_lexer_error lexbuf ("Illegal character " ^ Char.escaped c) }
+    | ws+       {token lexbuf}
+    | newline+ {Lexing.new_line lexbuf; token lexbuf}
+    | id as word {try
+                let kw = Hashtbl.find keywords word in
+                
+                kw
+                with Not_found -> 
+                
+                ID(word)
+                }
+    | digit+ as integer { INTEGER(int_of_string integer)}
+    | float as fl {FLOATLIT(float_of_string fl)}
+    | "true" { TRUE}
+    | "false"{ FALSE}
+    |   (("'")(([' ' -'~' ]) as c)("'")) { CHARLIT(c)}
+    | "//" { singlelinecomment lexbuf}
+    | "/*" {  multilinecomment lexbuf}
+    | '(' { LPAREN}
+    | ')' { RPAREN}
+    | '{' { LBRACE}
+    | '}' { RBRACE}
+    | '[' { LBRACKET}
+    | ']' { RBRACKET}
+    | '"' {get_string (Buffer.create 15) lexbuf}  
+    | ';' { SEMI}
+    | ',' { COMMA}
+    | '+' { PLUS}
+    | '-' { MINUS}
+    | '*' { TIMES}
+    | '/' { DIVIDE}
+    | '%' { MOD}
+    | '=' { ASSIGN}
+    | "==" {EQ}
+    | "!=" { NEQ}
+    | '<' { LT}
+    | '>' { GT}
+    | "<=" { LEQ}
+    | ">=" { GEQ}
+    | '!' { NOT}
+    | '&' { ADDRESS}
+    | "&&" { AND}
+    | "++" {INCREMENT}
+    | "--" {DECREMENT}
+    | "+=" {SHORTADD}
+    | "-=" {SHORTMIN}
+    | "*=" {SHORTMUL}
+    | "/=" {SHORTDIV}
+    | "%=" {SHORTMOD}
+    | "||" { OR}
+    | eof   { EOF}
+    | _ as c           { Util.raise_lexer_error lexbuf @@ "Illegal character " ^ Char.escaped c }
 
 and singlelinecomment = parse
-                | newline {Lexing.new_line lexbuf; token lexbuf}
-                | _ {singlelinecomment lexbuf}
+    | newline {Lexing.new_line lexbuf; token lexbuf}
+    | _ {singlelinecomment lexbuf}
 
 and multilinecomment = parse
-        "*/" {token lexbuf}
-        | _ { multilinecomment lexbuf}
+    | "*/" {token lexbuf}
+    | _ { multilinecomment lexbuf}
+
+and get_string  buffer = parse
+    | '"'   {STRING (Buffer.contents buffer)}
+    | '\\' '/'  { Buffer.add_char buffer '/'; get_string buffer lexbuf }
+    | '\\' '\\' { Buffer.add_char buffer '\\'; get_string buffer lexbuf }
+    | '\\' 'b'  { Buffer.add_char buffer '\b'; get_string buffer lexbuf }
+    | '\\' 'f'  { Buffer.add_char buffer '\012'; get_string buffer lexbuf }
+    | '\\' 'n'  { Buffer.add_char buffer '\n'; get_string buffer lexbuf }
+    | '\\' 'r'  { Buffer.add_char buffer '\r'; get_string buffer lexbuf }
+    | '\\' 't'  { Buffer.add_char buffer '\t'; get_string buffer lexbuf }
+    | [^ '"' '\\']+
+    { Buffer.add_string buffer (Lexing.lexeme lexbuf);
+      get_string buffer lexbuf
+    }
+    | eof {Util.raise_lexer_error lexbuf "string is not terminated"}
+    | _  {Util.raise_lexer_error lexbuf @@ "Illegal string character" ^Lexing.lexeme lexbuf}

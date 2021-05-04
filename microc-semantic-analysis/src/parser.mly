@@ -40,6 +40,7 @@
 %token <int>INTEGER
 %token <float> FLOATLIT
 %token <char>CHARLIT
+%token <string>STRING
 %token TRUE FALSE
 %token EOF
 
@@ -194,6 +195,8 @@ aexpr:
   {node (CLiteral(c)) $loc}
 | f=FLOATLIT
   {node (FLiteral(f)) $loc}
+| s=STRING 
+  {node (String(s)) $loc}
 | TRUE 
   {node (BLiteral(true)) $loc}
 | FALSE 

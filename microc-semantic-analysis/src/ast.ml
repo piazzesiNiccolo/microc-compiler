@@ -49,6 +49,7 @@ and expr_node =
   | FLiteral of float 
   | CLiteral of char (* Char literal                *)
   | BLiteral of bool (* Bool literal                *)
+  | String of string
   | Null
   | UnaryOp of uop * expr (* Unary primitive operator    *)
   | BinaryOp of binop * expr * expr (* Binary primitive operator   *)
