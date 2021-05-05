@@ -35,14 +35,12 @@ let ws = [' ' '\t']
 rule token = parse
     | ws+       {token lexbuf}
     | newline+ {Lexing.new_line lexbuf; token lexbuf}
-    | id as word {try
-                let kw = Hashtbl.find keywords word in
-                
-                kw
-                with Not_found -> 
-                
-                ID(word)
-                }
+    | id as word 
+        {
+          match Hashtbl.find_opt keywords word with 
+          | Some kw -> kw 
+          | None -> ID(word)      
+        }
     | digit+ as integer { INTEGER(int_of_string integer)}
     | float as fl {FLOATLIT(float_of_string fl)}
     | "true" { TRUE}

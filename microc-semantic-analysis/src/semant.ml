@@ -51,13 +51,14 @@ let check_fun_type loc t =
 
 let rec match_types loc t1 t2 =
   match (t1, t2) with
-  | TypA (t1, Some v), TypA (t2, Some v2) when v == v2 -> match_types loc t1 t2
-  | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 -> Util.raise_semantic_error loc "Array size must be the same"
+  | TypA (t1, Some v), TypA (t2, Some v2) when v = v2 -> match_types loc t1 t2
+  | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 ->
+      Util.raise_semantic_error loc "Array size must be the same"
   | TypA (t1, None), TypA (t2, _) -> match_types loc t1 t2
   | TypP _, TypNull -> true
   | TypNull, TypP _ -> true
   | TypP t1, TypP t2 -> match_types loc t1 t2
-  | t1, t2 -> t1 == t2
+  | t1, t2 -> t1 = t2
 
 let binaryexp_type loc op et1 et2 =
   match (op, et1, et2) with
@@ -111,7 +112,7 @@ let rec expr_type scope e =
   | CLiteral _ -> TypC
   | FLiteral _ -> TypF
   | BLiteral _ -> TypB
-  | String s -> TypA(TypC, Some (String.length s + 1))
+  | String s -> TypA (TypC, Some (String.length s + 1))
   | Null -> TypNull
   | UnaryOp (u, e1) ->
       let et = expr_type scope e1 in
@@ -125,8 +126,9 @@ let rec expr_type scope e =
       match Symbol_table.lookup id scope.fun_symbols with
       | Some (_, f) ->
           let formals_types = List.map (fun (t, i) -> t) f.formals in
-          if List.length params_types == List.length formals_types then
-            if List.for_all2 (match_types e.loc) formals_types params_types then f.typ
+          if List.length params_types = List.length formals_types then
+            if List.for_all2 (match_types e.loc) formals_types params_types then
+              f.typ
             else Util.raise_semantic_error e.loc "wrong parameter type"
           else
             Util.raise_semantic_error e.loc
@@ -192,13 +194,17 @@ let rec check_stmt scope ftype s =
 and check_stmtordec scope ftype s =
   match s.node with
   | Dec (t, i, None) -> check_var_decl scope s.loc (t, i)
-  | Dec (t, i, Some e) ->
+  | Dec (t, i, Some e) -> (
       check_var_decl scope s.loc (t, i);
-      let et = expr_type scope e in
-      if match_types s.loc t et then ()
-      else
-        Util.raise_semantic_error s.loc
-          "cannot initialize variable with value of different type"
+      match (t, e.node) with
+      | TypA (TypC, _), String _ -> ()
+      | _ ->
+          let et = expr_type scope e in
+          match et with
+          | TypA(_,_) -> Util.raise_semantic_error s.loc "Array is not a valid value initializer"
+          | _ -> 
+            if match_types s.loc t et then ()
+            else Util.raise_semantic_error s.loc "Value of different type")
   | Stmt s -> check_stmt scope ftype s
 
 let check_parameter scope loc (t, i) =
@@ -227,7 +233,8 @@ let check_func f scope loc =
 
 let rec global_expr_type scope loc e =
   match e.node with
-  | ILiteral _ | CLiteral _ | BLiteral _ | FLiteral _ | String _ -> expr_type scope e
+  | ILiteral _ | CLiteral _ | BLiteral _ | FLiteral _ | String _ | Null ->
+      expr_type scope e
   | UnaryOp (u, e) ->
       let et = global_expr_type scope loc e in
       unaryexp_type loc u et
@@ -243,11 +250,14 @@ let check_topdecl scope node =
   match node.node with
   | Fundecl f -> check_func f scope node.loc
   | Vardec (t, i, None) -> check_var_decl scope node.loc (t, i)
-  | Vardec (t, i, Some e) ->
+  | Vardec (t, i, Some e) -> (
       check_var_decl scope node.loc (t, i);
-      let et = global_expr_type scope node.loc e in
-      if match_types node.loc t et then ()
-      else Util.raise_semantic_error node.loc "Value of different type"
+      match (t, e.node) with
+      | TypA (TypC, _), String _ -> ()
+      | _ ->
+          let et = global_expr_type scope node.loc e in
+          if match_types node.loc t et then ()
+          else Util.raise_semantic_error node.loc "Value of different type")
 
 let check_global_properties scope =
   let m = Symbol_table.lookup "main" scope.fun_symbols in

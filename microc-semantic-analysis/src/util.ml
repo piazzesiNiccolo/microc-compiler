@@ -16,6 +16,14 @@ let prelude =
           formals = [ (TypI, "a") ];
           body = { loc = dummy_pos; node = Block []; id = 0 };
         } ) );
+    ( "getint",
+      ( dummy_pos,
+        {
+          typ = TypI;
+          fname = "getint";
+          formals = [];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
   ]
 
 let get_lexing_position lexbuf =
