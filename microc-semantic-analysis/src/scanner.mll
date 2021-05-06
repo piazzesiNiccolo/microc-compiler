@@ -8,7 +8,7 @@
         table
 
     
-    let keywords = create_hashtable 14 [
+    let keywords = create_hashtable 15 [
         ("if", IF);
         ("return",RETURN);
         ("else", ELSE);
@@ -22,7 +22,8 @@
         ("true",TRUE);
         ("false",FALSE);
         ("do",DO);
-        ("float",FLOAT)
+        ("float",FLOAT);
+        ("struct",STRUCT)
     ]
 }
 let digit = ['0' - '9']
@@ -63,6 +64,7 @@ rule token = parse
     | '/' { DIVIDE}
     | '%' { MOD}
     | '=' { ASSIGN}
+    | '.' {DOT}
     | "==" {EQ}
     | "!=" { NEQ}
     | '<' { LT}

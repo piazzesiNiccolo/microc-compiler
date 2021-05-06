@@ -36,6 +36,7 @@ type typ =
   | TypA of typ * int option (* Array type                  *)
   | TypP of typ (* Pointer type                *)
   | TypV (* Type void                   *)
+  | TypS of identifier
   | TypNull (*bottom type for null value*)
 [@@deriving show]
 
@@ -62,6 +63,7 @@ and access_node =
   | AccVar of identifier (* Variable access        x    *)
   | AccDeref of expr (* Pointer dereferencing  *p   *)
   | AccIndex of access * expr (* Array indexing         a[e] *)
+  | AccField of access * identifier
 [@@deriving show]
 
 and stmt = stmt_node annotated_node
@@ -90,9 +92,14 @@ type fun_decl = {
 }
 [@@deriving show]
 
+type struct_decl = {
+  sname : string;
+  fields :  (typ*identifier) list;
+}
+[@@deriving show]
 type topdecl = topdecl_node annotated_node
 
-and topdecl_node = Fundecl of fun_decl | Vardec of typ * identifier * expr option
+and topdecl_node = Fundecl of fun_decl | Vardec of typ * identifier * expr option | Structdecl of struct_decl
 [@@deriving show]
 
 type program = Prog of topdecl list [@@deriving show]

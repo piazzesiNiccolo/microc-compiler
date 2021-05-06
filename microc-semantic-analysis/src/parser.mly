@@ -28,8 +28,8 @@
 
 /* Tokens declarations */
 
-%token IF RETURN ELSE FOR WHILE DO INT CHAR VOID NULL BOOL FLOAT
-%token PLUS MINUS TIMES DIVIDE MOD 
+%token IF RETURN ELSE FOR WHILE DO INT CHAR VOID NULL BOOL FLOAT STRUCT
+%token PLUS MINUS TIMES DIVIDE MOD DOT
 %token AND OR EQ NEQ NOT GT LT GEQ LEQ
 %token ADDRESS ASSIGN
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
@@ -49,7 +49,7 @@
 %nonassoc ELSE
 
 %right ASSIGN SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
-%left OR
+%left OR DOT
 %left AND 
 %left EQ NEQ
 %nonassoc GT LT GEQ LEQ
@@ -79,6 +79,8 @@ topdec:
 | v = vardecl e = option(preceded(ASSIGN,expr)) SEMI {node (Vardec(fst v, snd v,e)) $loc}
 | t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
   {node (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
+| STRUCT i = ID LBRACE l=list(terminated(vardecl,SEMI)) RBRACE SEMI 
+  {node (Structdecl({sname=i; fields=l})) $loc}
 ;
 
 typ:
@@ -87,6 +89,7 @@ typ:
   | CHAR {TypC}
   | BOOL {TypB}
   | VOID {TypV}
+  | STRUCT i = ID {TypS(i)}
 ;
 vardecl:
 | t = typ v = vardesc {((fst v) t, snd v)}
@@ -145,6 +148,7 @@ lexpr:
 | LPAREN l = lexpr RPAREN {l}
 | TIMES l = lexpr {node (AccDeref(node (Access(l)) $loc)) $loc}
 | l=lexpr LBRACKET e = expr RBRACKET { node (AccIndex(l,e)) $loc}
+| l = lexpr DOT f=ID {node (AccField(l,f)) $loc}
 ;
 
 rexpr:

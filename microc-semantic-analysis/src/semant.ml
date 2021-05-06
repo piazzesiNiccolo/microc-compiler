@@ -5,9 +5,12 @@ type var_info = position * typ
 
 type fun_info = position * fun_decl
 
+type struct_info = position * struct_decl
+
 type symbols = {
   fun_symbols : fun_info Symbol_table.t;
   var_symbols : var_info Symbol_table.t;
+  struct_symbols : struct_info Symbol_table.t;
 }
 
 let rec defined_type_size t =
@@ -159,7 +162,16 @@ and access_type scope a =
           )
       | _ -> Util.raise_semantic_error a.loc "Index of array must be an integer"
       )
-
+  | AccField(s, f) -> 
+    match access_type scope s with
+    | TypS(s) ->
+      (match Symbol_table.lookup s scope.struct_symbols with
+        | Some (_,s) ->
+          (match List.find_opt (fun (t,i) -> i = f) s.fields with
+            | Some (t, _) -> t
+            | None -> Util.raise_semantic_error a.loc @@ "Field "^ f^" does not exists in structure "^ s.sname)       
+        | None -> Util.raise_semantic_error a.loc @@ "Structure "^s^" does not exists" )
+    | _ -> Util.raise_semantic_error a.loc "Trying to access field of non structure variable"
 let rec check_stmt scope ftype s =
   match s.node with
   | If (e, s1, s2) ->
@@ -224,8 +236,10 @@ let check_func f scope loc =
   in
   let new_scope =
     {
+      scope with
       fun_symbols = rec_scope;
       var_symbols = Symbol_table.begin_block scope.var_symbols;
+      
     }
   in
   List.iter (check_parameter new_scope loc) f.formals;
@@ -258,6 +272,12 @@ let check_topdecl scope node =
           let et = global_expr_type scope node.loc e in
           if match_types node.loc t et then ()
           else Util.raise_semantic_error node.loc "Value of different type")
+  | Structdecl s -> 
+      try Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
+      let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
+      List.iter (check_var_decl struct_scope node.loc) s.fields
+      with DuplicateEntry -> Util.raise_semantic_error node.loc @@ "Structure "^ s.sname ^ " already defined"
+      
 
 let check_global_properties scope =
   let m = Symbol_table.lookup "main" scope.fun_symbols in
@@ -279,6 +299,7 @@ let check (Prog topdecls) =
     {
       fun_symbols = prelude_functions;
       var_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
+      struct_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
     }
   in
   List.iter (check_topdecl toplevel_scope) topdecls;
