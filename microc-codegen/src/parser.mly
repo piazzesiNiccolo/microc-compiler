@@ -1,36 +1,60 @@
-/*
-* MicroC Parser specification
-*/
+ %{
+        open Ast
+        open Lexing
+        open Util
+        open Lexing
 
-%{
-    open Ast
-    (* Define here your utility functions *)
-
+        let node nd loc = {loc = loc; node = nd; id=0}
+       
+         (* utility functions to convert a for to a while *)         
+        let for_opt_init e loc =
+              match e with
+              | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+              | None -> node (Stmt(node (Block([])) loc)) loc
+            
+        
+        let for_opt_cond e loc =
+              match e with
+              | Some(x) -> x
+              | None -> node (BLiteral(true)) loc
+  
+        let for_opt_incr e loc =
+              match e with
+              | Some(x) -> node (Stmt(node (Expr(x)) loc)) loc
+              | None -> node (Stmt( node (Block([])) loc)) loc
+        
 
 %}
 
 /* Tokens declarations */
 
-%token IF RETURN ELSE FOR WHILE INT CHAR VOID NULL BOOL
-%token PLUS MINUS TIMES DIVIDE MOD 
-%token AND OR EQ NEQ NOT GT LT GEQ LEQ TRUE FALSE
-%token REFERENCE ADDRESS ASSIGN
+%token IF RETURN ELSE FOR WHILE DO INT CHAR VOID NULL BOOL FLOAT STRUCT
+%token PLUS MINUS TIMES DIVIDE MOD DOT
+%token AND OR EQ NEQ NOT GT LT GEQ LEQ
+%token ADDRESS ASSIGN
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
+%token INCREMENT DECREMENT
 %token COMMA SEMI
+%token SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
 %token <string>ID
 %token <int>INTEGER
-%token <char>CHAR
+%token <float> FLOATLIT
+%token <char>CHARLIT
+%token <string>STRING
 %token TRUE FALSE
 %token EOF
 
 /* Precedence and associativity specification */
-%right EQ
-%left OR
+%nonassoc NOELSE
+%nonassoc ELSE
+
+%right ASSIGN SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
+%left OR DOT
 %left AND 
 %left EQ NEQ
 %nonassoc GT LT GEQ LEQ
 %left PLUS MINUS TIMES DIVIDE MOD
-%nonassoc NOT AND 
+%nonassoc NOT ADDRESS
 %nonassoc LBRACKET
 
 
@@ -43,112 +67,147 @@
 
 /* Grammar specification */
 
-vartyp:
-  |  INT   {TypI}
-  | CHAR  {TypC}
-  | BOOL  {TypB}
-;
-funtyp:
-  |  INT   {TypI}
-  | CHAR  {TypC}
-  | BOOL  {TypB}
-  | VOID  {TypV}
-;
+
 
 program:
-  |  d = list(topdecl)            {PROG(d)}
-  |  EOF                          {Prog([])}
+  | p = list(topdec) EOF     {Prog p}                
 ;
 
-topdecl:
-  | v = varDecl  SEMI {v}
-  | f =  funDecl      {f}
+
+
+topdec:
+| v = vardecl e = option(preceded(ASSIGN,expr)) SEMI {node (Vardec(fst v, snd v,e)) $loc}
+| t = typ i = ID LPAREN fs=separated_list(COMMA, vardecl) RPAREN b=block 
+  {node (Fundecl({typ=t; fname=i; formals=fs; body=b})) $loc}
+| STRUCT i = ID LBRACE l=list(terminated(vardecl,SEMI)) RBRACE SEMI 
+  {node (Structdecl({sname=i; fields=l})) $loc}
 ;
 
-varDecl:
-  | t = vartyp i = ID                                       {Vardec(t, i)}
-  | t= vartyp TIMES i = ID                                  {Vardec{TypP(t), i}}
-  | t = vartyp LPAREN i = ID RPAREN                         {Vardec(t, i)}
-  | t = vartyp i = id LBRACKET i = option(INTEGER) RBRACKET {Vardec(TypA(t,i))}
+typ:
+  | INT {TypI}
+  | FLOAT {TypF}
+  | CHAR {TypC}
+  | BOOL {TypB}
+  | VOID {TypV}
+  | STRUCT i = ID {TypS(i)}
+;
+vardecl:
+| t = typ v = vardesc {((fst v) t, snd v)}
 ;
 
-funDecl:
-  | t = funtyp i = ID LPAREN p = params RPAREN b = block    {Fundecl({typ=t, fname=i,formals = p, body=b})}       
-;
-params:
-  |                                 {[]}
-  | p = varDecl                     {[p]}
-  | p = varDecl COMMA ps = params   {p::ps}
+vardesc:
+| i = ID  {((fun t -> t), i)} 
+| TIMES v = vardesc %prec ADDRESS {((fun t->fst v (TypP(t))) , snd v )}
+| LPAREN v = vardesc RPAREN {v}
+| v = vardesc LBRACKET n = option(INTEGER) RBRACKET {((fun t -> fst v (TypA(t,n))), snd v) }
 ;
 
-block: 
-  |LBRACE ss = statements RBRACE   {Block(ss)}
-;
-statements:
-  |                           {[]}
-  | s = stmt ss = statements  {s::ss}
+
+
+block:
+| LBRACE c=list(stmtordec) RBRACE { node (Block(c)) $loc}
 ;
 
-stmt:
-  | v = varDecl SEMI                {v}
-  |  RETURN e = expr SEMI           {Return(Some e)}
-  | RETURN SEMI                     {Return(None)}
-  | e = expr SEMI                   {e}
-  | LBRACE b = block RBRACE         {b} 
-  | WHILE LPAREN e = expr RPAREN b = Block  {While(e,b)}
-  | IF LPAREN e = expr RPAREN s = stmt {If(e,s,Block[])}
-  | IF LPAREN e = expr RPAREN s = stmt ELSE s2 = stmt {If(e,s, s2)}
-  | FOR LPAREN e1 = expr SEMI e2 = expr SEMI e3 = expr RPAREN b = block {}
+stmtordec:
+| s = statement {node (Stmt(s)) $loc}
+| v = vardecl e = option(preceded(ASSIGN,expr)) SEMI {node (Dec(fst v, snd v,e)) $loc}
 ;
+statement: 
+| RETURN e = option(expr) SEMI {node (Return(e)) $loc}
+| e = expr SEMI {node (Expr(e)) $loc}
+| b = block {b}
+| DO s = statement WHILE LPAREN e = expr RPAREN SEMI {node (DoWhile(e, s)) $loc}
+| WHILE LPAREN e = expr RPAREN s=statement {node (While(e, s)) $loc}
+| FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
+{
+    node (Block([for_opt_init init $loc;
+              node (Stmt(
+                  node (While(for_opt_cond ext_cond $loc,
+                    node (Block([node (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
+                  $loc)) 
+              $loc;
+              ])) 
+    $loc
+}
+| IF LPAREN cond=expr RPAREN s=statement e=elseblock
+  {node (If(cond,s,e)) $loc}
+;
+
+elseblock:
+  | %prec NOELSE{node (Block([])) $loc}
+  | ELSE st=statement {st}
+;
+
 expr:
-  |  e = rexpr {e}
-  | e = lexpr {e}
+| r = rexpr {r}
+| l = lexpr {node (Access(l)) $loc}
 ;
-
 
 lexpr:
-  |  id = ID                                                 {Access(AccVar(id))}
-  | LPAREN e = lexpr RPAREN                                 {e}
-  | TIMES e1 = lexpr                                        {Access(Accderef(expr))}
-  | TIMES e = aexpr                                         {Access(Accderef(e))}
-  | el = lexpr LBRACKET e1=expr RBRACKET                    {Access(AccIndex(AccVar(id), e1))}
+| i = ID {node (AccVar(i)) $loc}
+| LPAREN l = lexpr RPAREN {l}
+| TIMES l = lexpr {node (AccDeref(node (Access(l)) $loc)) $loc}
+| l=lexpr LBRACKET e = expr RBRACKET { node (AccIndex(l,e)) $loc}
+| l = lexpr DOT f=ID {node (AccField(l,f)) $loc}
 ;
-
 
 rexpr:
-  | a = aexpr                                               {a}
-  | i = ID LPAREN a = fargs RPAREN                          {Call(i, a)}
-  | el = lexpr ASSIGN e = expr                              {Assign(AccVar(id), e)}
-  | e1 = expr PLUS e2 = expr                                {BinaryOP(Add, e1, e2)}
-  | e1 = expr MINUS e2 = expr                               {BinaryOP(Sub, e1, e2)}
-  | e1 = expr TIMES e2 = expr                               {BinaryOP(Mult, e1, e2)}
-  | e1 = expr DIVIDE e2 = expr                              {BinaryOP(Div, e1, e2)}
-  | e1 = expr MOD e2 = expr                                 {BinaryOP(Mod, e1, e2)}
-  | e1 = expr EQ e2 = expr                                  {BinaryOP(Equal, e1, e2)}
-  | e1 = expr NEQ e2 = expr                                 {BinaryOP(Neq, e1, e2)}
-  | e1 = expr LT e2 = expr                                  {BinaryOP(Less, e1, e2)}
-  | e1 = expr GT e2 = expr                                  {BinaryOP(Greater, e1, e2)}
-  | e1 = expr LEQ e2 = expr                                 {BinaryOP(Leq, e1, e2)}
-  | e1 = expr GEQ e2 = expr                                 {BinaryOP(Geq, e1, e2)}
-  | e1 = expr AND e2 = expr                                 {BinaryOP(And, e1, e2)}
-  | e1 = expr OR e2 = expr                                  {BinaryOP(Or, e1, e2)}
-  | MINUS e = expr                                          {UnaryOp(Neg, e)}
-  | NOT e = expr                                            {UnaryOp(Not, e)}
-  | id = ID LPAREN  
+| a = aexpr {a}
+| i = ID LPAREN p=separated_list(COMMA,expr) RPAREN 
+  {node (Call(i,p)) $loc}
+| l = lexpr ASSIGN e = expr {node (Assign(l, e)) $loc}
+| u=unaryOp e=expr {node (UnaryOp(u, e)) $loc}
+| e=expr b=binOp e2=expr  {node (BinaryOp(b,e,e2)) $loc}
+| l=lexpr s=shortOp e = expr {node (Assign(l , node (BinaryOp(s,node (Access(l)) $loc,e)) $loc) ) $loc}
+| INCREMENT l = lexpr {node (UnaryOp(PreInc,node (Access(l)) $loc )) $loc}
+| DECREMENT l = lexpr {node (UnaryOp(PreDec,node (Access(l)) $loc )) $loc}
+| l  = lexpr INCREMENT {node (UnaryOp(PostInc,node (Access(l)) $loc )) $loc}
+| l  = lexpr DECREMENT {node (UnaryOp(PostDec,node (Access(l)) $loc )) $loc}
+;
+(*binop is inline in order to not have shift reduce conflicts*)
+%inline binOp:
+| PLUS  {Add}
+| MINUS   {Sub}
+| TIMES   {Mult}
+| MOD   {Mod}
+| DIVIDE  {Div}
+| AND   {And}
+| OR  {Or}
+| LT {Less}
+| GT {Greater}
+| LEQ {Leq}
+| GEQ {Geq}
+| EQ {Equal}
+| NEQ {Neq}
 ;
 
+%inline unaryOp:
+| NOT {Not}
+| MINUS {Neg}
+
+%inline shortOp:
+|SHORTADD {Add} 
+|SHORTDIV {Div}
+|SHORTMIN {Sub}
+|SHORTMUL {Mult}
+|SHORTMOD {Mod}
+;
 aexpr:
-  | i = INTEGER                                             {ILiteral(i)}
-  | c = CHAR                                                {CLiteral(c)}
-  | TRUE                                                    {BLiteral(true)}
-  | FALSE                                                   {BLiteral(false)}
-  | NULL                                                    {Addr(Accderef(-1))}                                              
-  | LPAREN r = rexpr RPAREN                                 {r}
-  | ADDRESS l = lexpr                                       {Addr(Accderef(l))}
-;
-
-fargs:
-  | {[]}
-  | e = expr {[e]}
-  | e = expr COMMA f = fargs {e::f}
-;
+| i=INTEGER 
+  {node (ILiteral(i)) $loc}
+| c=CHARLIT 
+  {node (CLiteral(c)) $loc}
+| f=FLOATLIT
+  {node (FLiteral(f)) $loc}
+| s=STRING 
+  {node (String(s)) $loc}
+| TRUE 
+  {node (BLiteral(true)) $loc}
+| FALSE 
+  {node (BLiteral(false)) $loc}
+| NULL 
+  {node (Null) $loc}
+| LPAREN r=rexpr RPAREN 
+  {r}
+| ADDRESS l=lexpr 
+  {node (Addr(l)) $loc}

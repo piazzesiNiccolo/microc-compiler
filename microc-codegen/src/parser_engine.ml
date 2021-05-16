@@ -1,5 +1,7 @@
 open Parser
-Open Scanner
+open Scanner
 let parse lexbuf =
-  Parser.main Scanner.next_token lexbuf
-
+try  
+  Parser.program Scanner.token lexbuf
+with Parser.Error ->
+  Util.raise_syntax_error lexbuf @@ "Syntax error at lexeme  " ^Lexing.lexeme lexbuf 

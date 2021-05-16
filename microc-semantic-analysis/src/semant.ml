@@ -19,7 +19,7 @@ let rec defined_type_size t =
   | TypA (t, None) -> false
   | _ -> true
 
-let check_type loc t =
+let check_type structs loc t =
   match t with
   | TypA (TypV, _) ->
       Util.raise_semantic_error loc "Trying to define a void array"
@@ -28,18 +28,23 @@ let check_type loc t =
   | TypA (t, _) when not (defined_type_size t) ->
       Util.raise_semantic_error loc "Array size undefined"
   | TypP TypV -> Util.raise_semantic_error loc "Trying to define a void pointer"
+  | TypS s -> (
+    match Symbol_table.lookup s structs with
+    | Some _ -> ()
+    | None -> Util.raise_semantic_error loc @@ "Undefined structure "^s
+  )
   | _ -> ()
 
-let check_var_type loc t =
+let check_var_type structs loc t =
   match t with
   | TypV -> Util.raise_semantic_error loc "Trying to define a void variable"
   | TypA (t, None) ->
       Util.raise_semantic_error loc
         "Array must be declared with an initial size"
-  | _ -> check_type loc t
+  | _ -> check_type structs loc t
 
 let check_var_decl scope loc (t, i) =
-  check_var_type loc t;
+  check_var_type scope.struct_symbols loc t;
   try Symbol_table.add_entry i (loc, t) scope.var_symbols |> ignore
   with DuplicateEntry ->
     Util.raise_semantic_error loc
@@ -220,7 +225,7 @@ and check_stmtordec scope ftype s =
   | Stmt s -> check_stmt scope ftype s
 
 let check_parameter scope loc (t, i) =
-  check_type loc t;
+  check_type scope.struct_symbols loc t;
   try Symbol_table.add_entry i (loc, t) scope.var_symbols |> ignore
   with DuplicateEntry ->
     Util.raise_semantic_error loc

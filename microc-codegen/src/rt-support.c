@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// TODO
+
 int getint(){
-  return 0;
+  int n;
+  scanf("%d\n",&n);
+  return n;
 }
 
 void print(int n){
