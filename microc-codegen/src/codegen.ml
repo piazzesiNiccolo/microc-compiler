@@ -47,13 +47,19 @@ let rec build_llvm_type structs = function
 
 let add_rt_support llmodule scope =
   Util.rt_support
-  |> List.map
-      (fun (n,(_,f)) -> (n, 
-                      L.function_type (build_llvm_type scope.struct_symbols f.typ) (List.map (build_llvm_type scope.struct_symbols ) (List.map fst f.formals) 
-                      |> Array.of_list)))
-  |> List.iter
-      (fun (n,t) -> Symbol_table.add_entry n (L.declare_function n t llmodule) scope.fun_symbols |> ignore)
-  
+  |> List.map (fun (n, (_, f)) ->
+         ( n,
+           L.function_type
+             (build_llvm_type scope.struct_symbols f.typ)
+             (List.map
+                (build_llvm_type scope.struct_symbols)
+                (List.map fst f.formals)
+             |> Array.of_list) ))
+  |> List.iter (fun (n, t) ->
+         Symbol_table.add_entry n
+           (L.declare_function n t llmodule)
+           scope.fun_symbols
+         |> ignore)
 
 let to_ir (Prog topdecls) =
   let module_name = "microc_module" in
@@ -67,5 +73,3 @@ let to_ir (Prog topdecls) =
   in
   add_rt_support llmodule init_scope;
   llmodule
-  
-
