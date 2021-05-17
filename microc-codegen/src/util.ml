@@ -4,6 +4,7 @@ exception Lexing_error of string
 
 exception Semantic_error of string
 
+exception Codegen_error of string
 open Ast
 
 let rt_support =
@@ -60,3 +61,5 @@ let raise_semantic_error (startp, endp) msg =
   in
   let log = Printf.sprintf "%s:%s: %s" line column msg in
   raise (Semantic_error log)
+
+let raise_codegen_error msg = raise (Codegen_error msg)
