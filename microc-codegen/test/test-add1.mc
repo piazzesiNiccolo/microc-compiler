@@ -2,6 +2,10 @@ int add(int x, int y)
 {
   return x + y;
 }
+struct Adder {
+  int a; 
+  float b;
+};
 
 int main()
 {

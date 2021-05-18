@@ -206,7 +206,8 @@ let rec check_stmt scope ftype s =
       let new_scope =
         { scope with var_symbols = Symbol_table.begin_block scope.var_symbols }
       in
-      List.iter (check_stmtordec new_scope ftype) stmts
+      List.iter (check_stmtordec new_scope ftype) stmts;
+      Symbol_table.end_block new_scope.var_symbols |> ignore
 
 and check_stmtordec scope ftype s =
   match s.node with
@@ -248,7 +249,9 @@ let check_func f scope loc =
     }
   in
   List.iter (check_parameter new_scope loc) f.formals;
-  check_stmt new_scope f.typ f.body
+  check_stmt new_scope f.typ f.body;
+  Symbol_table.end_block new_scope.var_symbols |> ignore
+
 
 let rec global_expr_type scope loc e =
   match e.node with
@@ -280,7 +283,8 @@ let check_topdecl scope node =
   | Structdecl s -> 
       try Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
       let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
-      List.iter (check_var_decl struct_scope node.loc) s.fields
+      List.iter (check_var_decl struct_scope node.loc) s.fields;
+      Symbol_table.end_block struct_scope.var_symbols |> ignore
       with DuplicateEntry -> Util.raise_semantic_error node.loc @@ "Structure "^ s.sname ^ " already defined"
       
 

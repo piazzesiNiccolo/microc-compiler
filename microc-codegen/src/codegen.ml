@@ -45,6 +45,26 @@ let rec build_llvm_type structs = function
       | Some (t, _) -> t
       | None -> Util.raise_codegen_error @@ "Undefined structure " ^ n)
 
+let codegen_func llmodule scope func =
+  let ret_type = build_llvm_type scope.struct_symbols func.typ in
+  let formals_types =
+    func.formals |> List.map fst
+    |> List.map (build_llvm_type scope.struct_symbols)
+  in
+  let f_type = L.function_type ret_type (Array.of_list formals_types) in
+  let f = L.define_function func.fname f_type llmodule in
+  Symbol_table.add_entry func.fname f scope.fun_symbols  |> ignore
+
+let codegen_topdecl llmodule scope n =
+  match n.node with
+  | Fundecl f -> codegen_func llmodule scope f |> ignore
+  | Vardec (t, i, None) -> ()
+  | Vardec (t, i, Some v) -> ()
+  | Structdecl s -> 
+    let fields_t = s.fields |> List.map (fun (t, f) -> (build_llvm_type scope.struct_symbols t,f)) in 
+    let struct_t = L.struct_type llcontext (Array.of_list (List.map fst fields_t)) in 
+    Symbol_table.add_entry s.sname (struct_t, fields_t) scope.struct_symbols |> ignore
+
 let add_rt_support llmodule scope =
   Util.rt_support
   |> List.map (fun (n, (_, f)) ->
@@ -72,4 +92,5 @@ let to_ir (Prog topdecls) =
     }
   in
   add_rt_support llmodule init_scope;
+  List.iter (codegen_topdecl llmodule init_scope) topdecls;
   llmodule
