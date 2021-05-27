@@ -19,7 +19,7 @@ let rec defined_type_size t =
   | TypA (t, None) -> false
   | _ -> true
 
-let check_type structs loc t =
+let rec check_type structs loc t =
   match t with
   | TypA (TypV, _) ->
       Util.raise_semantic_error loc "Trying to define a void array"
@@ -28,6 +28,7 @@ let check_type structs loc t =
   | TypA (t, _) when not (defined_type_size t) ->
       Util.raise_semantic_error loc "Array size undefined"
   | TypP TypV -> Util.raise_semantic_error loc "Trying to define a void pointer"
+  | TypP t -> check_type structs loc t
   | TypS s -> (
     match Symbol_table.lookup s structs with
     | Some _ -> ()
@@ -293,7 +294,7 @@ let check_global_properties scope =
   match m with
   | Some (_, { typ = TypV; fname = "main"; formals = [] }) -> ()
   | Some (_, { typ = TypI; fname = "main"; formals = [] }) -> ()
-  | Some _ -> Util.raise_semantic_error dummy_pos "Invalid signature of main"
+  | Some (loc,_) -> Util.raise_semantic_error loc "Invalid signature of main"
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 
 let support_functions =

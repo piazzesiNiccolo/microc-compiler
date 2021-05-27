@@ -1,20 +1,18 @@
 exception DuplicateEntry
 
-type 'a t = Empty_table | Table of 'a t * (string, 'a) Hashtbl.t
+type 'a t = Dummy | Table of 'a t * (string, 'a) Hashtbl.t
 
-let empty_table = Empty_table
+let empty_table = Dummy
 
-let begin_block table =
-  match table with
-  | Empty_table -> Table (Empty_table, Hashtbl.create 0)
-  | v -> Table (v, Hashtbl.create 0)
+let begin_block parent =
+  Table(parent,Hashtbl.create 0)
 
 let end_block table =
-  match table with Empty_table -> Empty_table | Table (p, _) -> p
+  match table with Dummy -> Dummy | Table (p, _) -> p
 
 let add_entry symbol info table =
   match table with
-  | Empty_table -> failwith "No scope currently defined"
+  | Dummy -> failwith "No scope currently defined"
   | Table (p, t) as x -> (
       match Hashtbl.find_opt t symbol with
       | None ->
@@ -24,7 +22,7 @@ let add_entry symbol info table =
 
 let rec lookup symbol table =
   match table with
-  | Empty_table -> None
+  | Dummy -> None
   | Table (p, t) -> (
       match Hashtbl.find_opt t symbol with
       | None -> lookup symbol p
