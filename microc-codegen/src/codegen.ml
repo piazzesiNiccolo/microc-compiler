@@ -45,6 +45,50 @@ let rec build_llvm_type structs = function
       | Some (t, _) -> t
       | None -> Util.raise_codegen_error @@ "Undefined structure " ^ n)
 
+let const_op = function
+  | t, Neg when t = int_type -> L.const_neg
+  | t, Neg when t = float_type -> L.const_fneg
+  | t, Not when t = bool_type -> L.const_not
+  | _ -> Util.raise_codegen_error "Invald unary operator for global variable"
+
+let const_bin_op = function
+  | t1, t2, Add when t1 = int_type && t2 = int_type -> L.const_add
+  | t1, t2, Sub when t1 = int_type && t2 = int_type -> L.const_sub
+  | t1, t2, Div when t1 = int_type && t2 = int_type -> L.const_sdiv
+  | t1, t2, Mult when t1 = int_type && t2 = int_type -> L.const_mul
+  | t1, t2, Mod when t1 = int_type && t2 = int_type -> L.const_srem
+  | t1, t2, Less when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Slt
+  | t1, t2, Leq when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Sle
+  | t1, t2, Greater when t1 = int_type && t2 = int_type ->
+      L.const_icmp L.Icmp.Sgt
+  | t1, t2, Geq when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Sge
+  | t1, t2, Equal when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Eq
+  | t1, t2, Neq when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Ne
+  | t1, t2, Add when t1 = float_type && t2 = float_type -> L.const_fadd
+  | t1, t2, Sub when t1 = float_type && t2 = float_type -> L.const_fsub
+  | t1, t2, Div when t1 = float_type && t2 = float_type -> L.const_fdiv
+  | t1, t2, Mult when t1 = float_type && t2 = float_type -> L.const_fmul
+  | t1, t2, Less when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.Olt
+  | t1, t2, Leq when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.Ole
+  | t1, t2, Greater when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.Ogt
+  | t1, t2, Geq when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.Oge
+  | t1, t2, Equal when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.Oeq
+  | t1, t2, Neq when t1 = float_type && t2 = float_type ->
+      L.const_fcmp L.Fcmp.One
+  | t1, t2, And when t1 = bool_type && t2 = bool_type -> L.const_and
+  | t1, t2, Or when t1 = bool_type && t2 = bool_type -> L.const_or
+  | _ ->
+      Util.raise_codegen_error
+        "Mismatch between type of global variable and initial value"
+
+        
+let build_stmt fdef scope builder stmt = ()
+
 let codegen_func llmodule scope func =
   let ret_type = build_llvm_type scope.struct_symbols func.typ in
   let formals_types =
@@ -53,41 +97,18 @@ let codegen_func llmodule scope func =
   in
   let f_type = L.function_type ret_type (Array.of_list formals_types) in
   let f = L.define_function func.fname f_type llmodule in
-  Symbol_table.add_entry func.fname f scope.fun_symbols |> ignore
+  let local_scope = {scope with fun_symbols=Symbol_table.add_entry func.fname f scope.fun_symbols;var_symbols=Symbol_table.begin_block scope.var_symbols} in 
+  let f_builder = L.builder_at_end llcontext (L.entry_block f) in 
+  let build_param scope builder (t,i) p = 
+      let l = L.build_alloca (build_llvm_type scope.struct_symbols t ) i builder in 
+      Symbol_table.add_entry i l scope.var_symbols |> ignore;
+      L.build_store p l builder |> ignore
+  in 
+  List.iter2 (build_param local_scope f_builder) func.formals (Array.to_list (L.params f));
+  build_stmt f local_scope f_builder func.body
 
-let  const_op   = function
-| (t, Neg) when t = int_type -> L.const_neg 
-| (t,Neg) when t = float_type -> L.const_fneg
-| (t ,Not) when t = bool_type ->   L.const_not 
-| _ -> Util.raise_codegen_error "Invald unary operator for global variable"
 
-let const_bin_op = function
-| (t1, t2, Add) when t1 = int_type && t2 = int_type  -> L.const_add 
-| (t1, t2,Sub) when t1 = int_type && t2 = int_type -> L.const_sub 
-| (t1, t2,Div) when t1 = int_type && t2 = int_type -> L.const_sdiv
-| (t1, t2,Mult) when t1 = int_type && t2 = int_type -> L.const_mul
-| (t1, t2,Mod) when t1 = int_type && t2 = int_type -> L.const_srem
-| (t1, t2,Less)  when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Slt
-| (t1, t2,Leq) when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Sle
-| (t1, t2,Greater) when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Sgt
-| (t1, t2,Geq) when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Sge
-| (t1, t2,Equal) when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Eq
-| (t1,t2, Neq) when t1 = int_type && t2 = int_type -> L.const_icmp L.Icmp.Ne
 
-| (t1,t2,Add) when t1 = float_type && t2=float_type -> L.const_fadd
-| (t1,t2,Sub) when t1 = float_type && t2=float_type -> L.const_fsub
-| (t1,t2,Div) when t1 = float_type && t2=float_type -> L.const_fdiv 
-| (t1,t2,Mult) when t1 = float_type && t2=float_type -> L.const_fmul
-| (t1,t2,Less) when t1 = float_type && t2=float_type  -> L.const_fcmp L.Fcmp.Olt
-| (t1,t2,Leq) when t1 = float_type && t2=float_type -> L.const_fcmp L.Fcmp.Ole
-| (t1,t2,Greater) when t1 = float_type && t2=float_type -> L.const_fcmp L.Fcmp.Ogt
-| (t1,t2,Geq) when t1 = float_type && t2=float_type -> L.const_fcmp L.Fcmp.Oge
-| (t1,t2,Equal) when t1 = float_type && t2=float_type -> L.const_fcmp L.Fcmp.Oeq
-| (t1,t2, Neq) when t1 = float_type && t2=float_type -> L.const_fcmp L.Fcmp.One
-
-| (t1,t2,And) when t1=bool_type && t2 = bool_type -> L.const_and 
-| (t1,t2,Or) when t1 = bool_type && t2 = bool_type -> L.const_or
-| _ -> Util.raise_codegen_error "Mismatch between type of global variable and initial value"
 
 let rec codegen_global_expr structs t e =
   match e.node with
@@ -97,17 +118,18 @@ let rec codegen_global_expr structs t e =
   | BLiteral b -> if b then llvm_true else llvm_false
   | String s -> L.const_stringz llcontext s
   | Null -> build_llvm_type structs t |> L.const_pointer_null
-  | UnaryOp (uop, e1) -> 
-    (let a = codegen_global_expr structs t e1  in
-     let t1 = L.type_of a in
-     const_op (t1,uop) a  )
-  | BinaryOp(binop,e1,e2) -> 
-    (let a = codegen_global_expr structs t e1 in 
-    let b = codegen_global_expr structs t e2 in 
-    let t1 = L.type_of a in 
-    let t2 = L.type_of b in 
-    const_bin_op (t1,t2,binop) a b)
-  | _ -> Util.raise_codegen_error "Invalid initial expression for global variable"
+  | UnaryOp (uop, e1) ->
+      let a = codegen_global_expr structs t e1 in
+      let t1 = L.type_of a in
+      const_op (t1, uop) a
+  | BinaryOp (binop, e1, e2) ->
+      let a = codegen_global_expr structs t e1 in
+      let b = codegen_global_expr structs t e2 in
+      let t1 = L.type_of a in
+      let t2 = L.type_of b in
+      const_bin_op (t1, t2, binop) a b
+  | _ ->
+      Util.raise_codegen_error "Invalid initial expression for global variable"
 
 let codegen_global_variable llmodule scope (t, i) init =
   let var_init =
