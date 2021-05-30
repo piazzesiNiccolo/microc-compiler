@@ -86,7 +86,6 @@ let const_bin_op = function
       Util.raise_codegen_error
         "Mismatch between type of global variable and initial value"
 
-        
 let build_stmt fdef scope builder stmt = ()
 
 let codegen_func llmodule scope func =
@@ -97,18 +96,24 @@ let codegen_func llmodule scope func =
   in
   let f_type = L.function_type ret_type (Array.of_list formals_types) in
   let f = L.define_function func.fname f_type llmodule in
-  let local_scope = {scope with fun_symbols=Symbol_table.add_entry func.fname f scope.fun_symbols;var_symbols=Symbol_table.begin_block scope.var_symbols} in 
-  let f_builder = L.builder_at_end llcontext (L.entry_block f) in 
-  let build_param scope builder (t,i) p = 
-      let l = L.build_alloca (build_llvm_type scope.struct_symbols t ) i builder in 
-      Symbol_table.add_entry i l scope.var_symbols |> ignore;
-      L.build_store p l builder |> ignore
-  in 
-  List.iter2 (build_param local_scope f_builder) func.formals (Array.to_list (L.params f));
+  let local_scope =
+    {
+      scope with
+      fun_symbols = Symbol_table.add_entry func.fname f scope.fun_symbols;
+      var_symbols = Symbol_table.begin_block scope.var_symbols;
+    }
+  in
+  let f_builder = L.builder_at_end llcontext (L.entry_block f) in
+  let build_param scope builder (t, i) p =
+    let l = L.build_alloca (build_llvm_type scope.struct_symbols t) i builder in
+    Symbol_table.add_entry i l scope.var_symbols |> ignore;
+    L.build_store p l builder |> ignore
+  in
+  List.iter2
+    (build_param local_scope f_builder)
+    func.formals
+    (Array.to_list (L.params f));
   build_stmt f local_scope f_builder func.body
-
-
-
 
 let rec codegen_global_expr structs t e =
   match e.node with
@@ -125,8 +130,7 @@ let rec codegen_global_expr structs t e =
   | BinaryOp (binop, e1, e2) ->
       let a = codegen_global_expr structs t e1 in
       let b = codegen_global_expr structs t e2 in
-      let t1 = L.type_of a in
-      let t2 = L.type_of b in
+      let t1, t2 = (L.type_of a, L.type_of b) in
       const_bin_op (t1, t2, binop) a b
   | _ ->
       Util.raise_codegen_error "Invalid initial expression for global variable"
