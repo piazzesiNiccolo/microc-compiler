@@ -45,6 +45,47 @@ let rec build_llvm_type structs = function
       | Some (t, _) -> t
       | None -> Util.raise_codegen_error @@ "Undefined structure " ^ n)
 
+let unop = function
+  | t, Neg when t = int_type -> L.build_neg
+  | t, Neg when t = float_type -> L.build_fneg
+  | t, Not when t = bool_type -> L.build_not
+  | _ -> Util.raise_codegen_error "Invald unary operator for global variable"
+
+let bin_op = function
+  | t1, t2, Add when t1 = int_type && t2 = int_type -> L.build_add
+  | t1, t2, Sub when t1 = int_type && t2 = int_type -> L.build_sub
+  | t1, t2, Div when t1 = int_type && t2 = int_type -> L.build_sdiv
+  | t1, t2, Mult when t1 = int_type && t2 = int_type -> L.build_mul
+  | t1, t2, Mod when t1 = int_type && t2 = int_type -> L.build_srem
+  | t1, t2, Less when t1 = int_type && t2 = int_type -> L.build_icmp L.Icmp.Slt
+  | t1, t2, Leq when t1 = int_type && t2 = int_type -> L.build_icmp L.Icmp.Sle
+  | t1, t2, Greater when t1 = int_type && t2 = int_type ->
+      L.build_icmp L.Icmp.Sgt
+  | t1, t2, Geq when t1 = int_type && t2 = int_type -> L.build_icmp L.Icmp.Sge
+  | t1, t2, Equal when t1 = int_type && t2 = int_type -> L.build_icmp L.Icmp.Eq
+  | t1, t2, Neq when t1 = int_type && t2 = int_type -> L.build_icmp L.Icmp.Ne
+  | t1, t2, Add when t1 = float_type && t2 = float_type -> L.build_fadd
+  | t1, t2, Sub when t1 = float_type && t2 = float_type -> L.build_fsub
+  | t1, t2, Div when t1 = float_type && t2 = float_type -> L.build_fdiv
+  | t1, t2, Mult when t1 = float_type && t2 = float_type -> L.build_fmul
+  | t1, t2, Less when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.Olt
+  | t1, t2, Leq when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.Ole
+  | t1, t2, Greater when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.Ogt
+  | t1, t2, Geq when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.Oge
+  | t1, t2, Equal when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.Oeq
+  | t1, t2, Neq when t1 = float_type && t2 = float_type ->
+      L.build_fcmp L.Fcmp.One
+  | t1, t2, And when t1 = bool_type && t2 = bool_type -> L.build_and
+  | t1, t2, Or when t1 = bool_type && t2 = bool_type -> L.build_or
+  | _ ->
+      Util.raise_codegen_error
+        "Mismatch between type of global variable and initial value"
+
 let const_op = function
   | t, Neg when t = int_type -> L.const_neg
   | t, Neg when t = float_type -> L.const_fneg
@@ -86,7 +127,59 @@ let const_bin_op = function
       Util.raise_codegen_error
         "Mismatch between type of global variable and initial value"
 
-let build_stmt fdef scope builder stmt = ()
+let build_unary_incr_or_decr builder op value =
+  let inc_op = function
+    | (PreInc | PostInc), t when t = int_type -> L.build_add llvm_one
+    | (PreInc | PostInc), t when t = float_type -> L.build_fadd llvm_one
+    | (PreDec | PostDec), t when t = int_type -> Fun.flip L.build_sub llvm_one
+    | (PreDec | PostDec), t when t = float_type -> Fun.flip L.build_sub llvm_one
+    | _ ->
+        Util.raise_codegen_error @@ "Invalid type for operator " ^ show_uop op
+  in
+  let apply_op = inc_op (op, L.type_of value) in
+  let before = L.build_load value "" builder in
+  let after = apply_op before "" builder in
+  L.build_store after value builder |> ignore;
+  if op = PreInc || op = PreDec then after else before
+
+let rec codegen_expr bm scope builder e =
+  match e.node with
+  | ILiteral i -> L.const_int int_type i
+  | FLiteral f -> L.const_float float_type f
+  | CLiteral c -> L.const_int char_type (Char.code c)
+  | BLiteral b -> if b then llvm_true else llvm_false
+  | String s -> L.const_stringz llcontext s
+  | Null -> L.const_pointer_null void_type
+  | Addr a -> codegen_access bm scope builder a
+  | Access a -> codegen_access bm scope builder a
+  | Assign (a, e) ->
+      let acc_var = codegen_access bm scope builder a in
+      let expr_val = codegen_expr bm scope builder e in
+      L.build_store expr_val acc_var builder |> ignore;
+      expr_val
+  | UnaryOp (((PreInc | PostInc | PreDec | PostDec) as op), e) ->
+      let e_val = codegen_expr bm scope builder e in
+      build_unary_incr_or_decr builder op e_val
+  | UnaryOp (u, e) ->
+      let e_val = codegen_expr bm scope builder e in
+      unop (L.type_of e_val, u) e_val "" builder
+  | BinaryOp (b, e1, e2) ->
+      let e1_val, e2_val =
+        (codegen_expr bm scope builder e1, codegen_expr bm scope builder e2)
+      in
+      bin_op (L.type_of e1_val, L.type_of e2_val, b) e1_val e2_val "" builder
+  | Call (f, params) ->
+      let actual_f =
+        match Symbol_table.lookup f scope.fun_symbols with
+        | Some n -> n
+        | None -> Util.raise_codegen_error @@ "Undefined  function  " ^ f
+      in
+      let llvm_params = List.map (codegen_expr bm scope builder) params in
+      L.build_call actual_f (Array.of_list llvm_params) f builder
+
+and codegen_access bm scope builder e = llvm_false
+
+let codegen_stmt fdef scope builder stmt = ()
 
 let codegen_func llmodule scope func =
   let ret_type = build_llvm_type scope.struct_symbols func.typ in
@@ -113,7 +206,7 @@ let codegen_func llmodule scope func =
     (build_param local_scope f_builder)
     func.formals
     (Array.to_list (L.params f));
-  build_stmt f local_scope f_builder func.body
+  codegen_stmt f local_scope f_builder func.body
 
 let rec codegen_global_expr structs t e =
   match e.node with
