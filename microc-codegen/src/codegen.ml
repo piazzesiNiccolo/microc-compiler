@@ -132,7 +132,8 @@ let build_unary_incr_or_decr builder op value =
     | (PreInc | PostInc), t when t = int_type -> L.build_add llvm_one
     | (PreInc | PostInc), t when t = float_type -> L.build_fadd llvm_one
     | (PreDec | PostDec), t when t = int_type -> Fun.flip L.build_sub llvm_one
-    | (PreDec | PostDec), t when t = float_type -> Fun.flip L.build_sub llvm_one
+    | (PreDec | PostDec), t when t = float_type ->
+        Fun.flip L.build_fsub llvm_onef
     | _ ->
         Util.raise_codegen_error @@ "Invalid type for operator " ^ show_uop op
   in
@@ -142,7 +143,7 @@ let build_unary_incr_or_decr builder op value =
   L.build_store after value builder |> ignore;
   if op = PreInc || op = PreDec then after else before
 
-let rec codegen_expr bm scope builder e =
+let rec codegen_expr  scope builder e =
   match e.node with
   | ILiteral i -> L.const_int int_type i
   | FLiteral f -> L.const_float float_type f
@@ -150,22 +151,24 @@ let rec codegen_expr bm scope builder e =
   | BLiteral b -> if b then llvm_true else llvm_false
   | String s -> L.const_stringz llcontext s
   | Null -> L.const_pointer_null void_type
-  | Addr a -> codegen_access bm scope builder a
-  | Access a -> codegen_access bm scope builder a
+  | Addr a -> codegen_access  scope builder a
+  | Access a ->
+      let a_val = codegen_access  scope builder a in
+      L.build_load a_val "" builder
   | Assign (a, e) ->
-      let acc_var = codegen_access bm scope builder a in
-      let expr_val = codegen_expr bm scope builder e in
+      let acc_var = codegen_access  scope builder a in
+      let expr_val = codegen_expr  scope builder e in
       L.build_store expr_val acc_var builder |> ignore;
       expr_val
   | UnaryOp (((PreInc | PostInc | PreDec | PostDec) as op), e) ->
-      let e_val = codegen_expr bm scope builder e in
+      let e_val = codegen_expr  scope builder e in
       build_unary_incr_or_decr builder op e_val
   | UnaryOp (u, e) ->
-      let e_val = codegen_expr bm scope builder e in
+      let e_val = codegen_expr  scope builder e in
       unop (L.type_of e_val, u) e_val "" builder
   | BinaryOp (b, e1, e2) ->
       let e1_val, e2_val =
-        (codegen_expr bm scope builder e1, codegen_expr bm scope builder e2)
+        (codegen_expr  scope builder e1, codegen_expr  scope builder e2)
       in
       bin_op (L.type_of e1_val, L.type_of e2_val, b) e1_val e2_val "" builder
   | Call (f, params) ->
@@ -174,12 +177,46 @@ let rec codegen_expr bm scope builder e =
         | Some n -> n
         | None -> Util.raise_codegen_error @@ "Undefined  function  " ^ f
       in
-      let llvm_params = List.map (codegen_expr bm scope builder) params in
+      let llvm_params = List.map (codegen_expr  scope builder) params in
       L.build_call actual_f (Array.of_list llvm_params) f builder
 
-and codegen_access bm scope builder e = llvm_false
+and codegen_access  scope builder a =
+  match a.node with
+  | AccVar i -> (
+      match Symbol_table.lookup i scope.var_symbols with
+      | Some v -> v
+      | None -> Util.raise_codegen_error @@ "Variable " ^ i ^ " not defined")
+  | AccDeref e -> codegen_expr  scope builder e
+  | AccIndex (a, i) ->
+      let a_val = codegen_access  scope builder a in
+      let ind = codegen_expr  scope builder i in
+      let a_type = L.classify_type (L.type_of a_val) in
+      let index =
+        if a_type = L.TypeKind.Array then [| llvm_zero; ind |] else [| ind |]
+      in
+      L.build_gep a_val index (L.string_of_llvalue a_val) builder
+  | AccField (a, f) ->
+      let a_val = codegen_access  scope builder a in
+      let sname = L.struct_name (L.type_of a_val) in
+      if not (Option.is_none sname) then
+        match Symbol_table.lookup (Option.get sname) scope.struct_symbols with
+        | Some (t, fields) ->
+            let to_index = List.mapi (fun i (_, m) -> (m, i)) fields in
+            let field_pos =
+              match List.assoc_opt f to_index with
+              | Some index -> index
+              | None ->
+                  Util.raise_codegen_error @@ "Undefined struct member " ^ f
+            in
+            L.build_struct_gep a_val field_pos "" builder
+        | None ->
+            Util.raise_codegen_error @@ "Undefined struct " ^ Option.get sname
+      else Util.raise_codegen_error "Unnamed struct"
 
-let codegen_stmt fdef scope builder stmt = ()
+let codegen_stmt fdef scope builder stmt = 
+  match stmt.node with 
+  | Expr e -> codegen_expr scope builder e 
+  | _ -> llvm_false
 
 let codegen_func llmodule scope func =
   let ret_type = build_llvm_type scope.struct_symbols func.typ in
@@ -206,7 +243,7 @@ let codegen_func llmodule scope func =
     (build_param local_scope f_builder)
     func.formals
     (Array.to_list (L.params f));
-  codegen_stmt f local_scope f_builder func.body
+  codegen_stmt f local_scope f_builder func.body |> ignore
 
 let rec codegen_global_expr structs t e =
   match e.node with
