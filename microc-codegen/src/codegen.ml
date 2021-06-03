@@ -23,12 +23,10 @@ let llvm_true = L.const_int bool_type 1
 
 let llvm_false = L.const_int bool_type 0
 
-type struct_type = L.lltype * (L.lltype * string) list
-
 type symbols = {
   fun_symbols : L.llvalue Symbol_table.t;
   var_symbols : L.llvalue Symbol_table.t;
-  struct_symbols : struct_type Symbol_table.t;
+  struct_symbols : (L.lltype * string list) Symbol_table.t;
 }
 
 let rec build_llvm_type structs = function
@@ -143,7 +141,7 @@ let build_unary_incr_or_decr builder op value =
   L.build_store after value builder |> ignore;
   if op = PreInc || op = PreDec then after else before
 
-let rec codegen_expr  scope builder e =
+let rec codegen_expr scope builder e =
   match e.node with
   | ILiteral i -> L.const_int int_type i
   | FLiteral f -> L.const_float float_type f
@@ -151,24 +149,25 @@ let rec codegen_expr  scope builder e =
   | BLiteral b -> if b then llvm_true else llvm_false
   | String s -> L.const_stringz llcontext s
   | Null -> L.const_pointer_null void_type
-  | Addr a -> codegen_access  scope builder a
+  | Addr a -> codegen_access scope builder a
   | Access a ->
-      let a_val = codegen_access  scope builder a in
-      L.build_load a_val "" builder
+      let a_val = codegen_access scope builder a in
+      if L.classify_type (L.type_of a_val) = L.TypeKind.Array then a_val
+      else L.build_load a_val "" builder
   | Assign (a, e) ->
-      let acc_var = codegen_access  scope builder a in
-      let expr_val = codegen_expr  scope builder e in
+      let acc_var = codegen_access scope builder a in
+      let expr_val = codegen_expr scope builder e in
       L.build_store expr_val acc_var builder |> ignore;
       expr_val
   | UnaryOp (((PreInc | PostInc | PreDec | PostDec) as op), e) ->
-      let e_val = codegen_expr  scope builder e in
+      let e_val = codegen_expr scope builder e in
       build_unary_incr_or_decr builder op e_val
   | UnaryOp (u, e) ->
-      let e_val = codegen_expr  scope builder e in
+      let e_val = codegen_expr scope builder e in
       unop (L.type_of e_val, u) e_val "" builder
   | BinaryOp (b, e1, e2) ->
       let e1_val, e2_val =
-        (codegen_expr  scope builder e1, codegen_expr  scope builder e2)
+        (codegen_expr scope builder e1, codegen_expr scope builder e2)
       in
       bin_op (L.type_of e1_val, L.type_of e2_val, b) e1_val e2_val "" builder
   | Call (f, params) ->
@@ -177,31 +176,32 @@ let rec codegen_expr  scope builder e =
         | Some n -> n
         | None -> Util.raise_codegen_error @@ "Undefined  function  " ^ f
       in
-      let llvm_params = List.map (codegen_expr  scope builder) params in
-      L.build_call actual_f (Array.of_list llvm_params) f builder
+      let llvm_params = List.map (codegen_expr scope builder) params in
+      L.build_call actual_f (Array.of_list llvm_params) "" builder
 
-and codegen_access  scope builder a =
+and codegen_access scope builder a =
   match a.node with
   | AccVar i -> (
       match Symbol_table.lookup i scope.var_symbols with
       | Some v -> v
       | None -> Util.raise_codegen_error @@ "Variable " ^ i ^ " not defined")
-  | AccDeref e -> codegen_expr  scope builder e
+  | AccDeref e -> codegen_expr scope builder e
   | AccIndex (a, i) ->
-      let a_val = codegen_access  scope builder a in
-      let ind = codegen_expr  scope builder i in
+      let a_val = codegen_access scope builder a in
+      let ind = codegen_expr scope builder i in
       let a_type = L.classify_type (L.type_of a_val) in
-      let index =
-        if a_type = L.TypeKind.Array then [| llvm_zero; ind |] else [| ind |]
-      in
-      L.build_gep a_val index (L.string_of_llvalue a_val) builder
+      if a_type = L.TypeKind.Array then
+        L.build_in_bounds_gep a_val [| llvm_zero; ind |]
+          (L.string_of_llvalue a_val)
+          builder
+      else L.build_gep a_val [| ind |] (L.string_of_llvalue a_val) builder
   | AccField (a, f) ->
-      let a_val = codegen_access  scope builder a in
-      let sname = L.struct_name (L.type_of a_val) in
+      let a_val = codegen_access scope builder a in
+      let sname = L.type_of a_val |> L.element_type |> L.struct_name in
       if not (Option.is_none sname) then
         match Symbol_table.lookup (Option.get sname) scope.struct_symbols with
         | Some (t, fields) ->
-            let to_index = List.mapi (fun i (_, m) -> (m, i)) fields in
+            let to_index = List.mapi (fun i m -> (m, i)) fields in
             let field_pos =
               match List.assoc_opt f to_index with
               | Some index -> index
@@ -213,10 +213,62 @@ and codegen_access  scope builder a =
             Util.raise_codegen_error @@ "Undefined struct " ^ Option.get sname
       else Util.raise_codegen_error "Unnamed struct"
 
-let codegen_stmt fdef scope builder stmt = 
-  match stmt.node with 
-  | Expr e -> codegen_expr scope builder e 
-  | _ -> llvm_false
+let add_terminator builder after =
+  let terminator = L.block_terminator (L.insertion_block builder) in
+  if Option.is_none terminator then after builder |> ignore else ()
+
+let rec codegen_stmt fdef scope builder stmt =
+  match stmt.node with
+  | If (e, st1, st2) ->
+      let blockt = L.append_block llcontext "then" fdef in
+      let blockelse = L.append_block llcontext "else" fdef in
+      let blockcont = L.append_block llcontext "cont" fdef in
+      let then_builder = L.builder_at_end llcontext blockt in
+      let else_builder = L.builder_at_end llcontext blockelse in
+      let e1 = codegen_expr scope builder e in
+      L.build_cond_br e1 blockt blockelse builder |> ignore;
+
+      codegen_stmt fdef scope then_builder st1 |> ignore;
+      add_terminator then_builder (L.build_br blockcont);
+
+      codegen_stmt fdef scope else_builder st2 |> ignore;
+      add_terminator else_builder (L.build_br blockcont);
+      L.position_at_end blockcont builder;
+      true
+  | Expr e ->
+      codegen_expr scope builder e |> ignore;
+      true
+  | Block b ->
+      let new_scope =
+        { scope with var_symbols = Symbol_table.begin_block scope.var_symbols }
+      in
+      List.fold_left
+        (fun cont bl ->
+          if cont then codegen_stmtordec fdef new_scope builder bl else false)
+        true b
+  | Return e ->
+      if Option.is_none e then L.build_ret_void |> add_terminator builder
+      else
+        Option.get e |> codegen_expr scope builder |> L.build_ret
+        |> add_terminator builder;
+      false
+  | _ -> failwith "not implemented"
+
+and codegen_stmtordec fdef scope builder st =
+  match st.node with
+  | Dec (t, i, init) ->
+      let var_v =
+        L.build_alloca (build_llvm_type scope.struct_symbols t) i builder
+      in
+      let get_init_val e =
+        let e_val = codegen_expr scope builder e in
+        L.build_store e_val var_v builder |> ignore;
+        var_v
+      in
+      let actual_value = Option.fold ~none:var_v ~some:get_init_val init in
+      Symbol_table.add_entry i actual_value scope.var_symbols |> ignore;
+      true
+  | Stmt s -> codegen_stmt fdef scope builder s
 
 let codegen_func llmodule scope func =
   let ret_type = build_llvm_type scope.struct_symbols func.typ in
@@ -243,7 +295,10 @@ let codegen_func llmodule scope func =
     (build_param local_scope f_builder)
     func.formals
     (Array.to_list (L.params f));
-  codegen_stmt f local_scope f_builder func.body |> ignore
+  codegen_stmt f local_scope f_builder func.body |> ignore;
+  add_terminator f_builder
+    (if L.classify_type f_type = L.TypeKind.Void then L.build_ret_void
+    else f_type |> L.undef |> L.build_ret)
 
 let rec codegen_global_expr structs t e =
   match e.node with
@@ -284,10 +339,12 @@ let codegen_topdecl llmodule scope n =
         s.fields
         |> List.map (fun (t, f) -> (build_llvm_type scope.struct_symbols t, f))
       in
-      let struct_t =
-        L.struct_type llcontext (Array.of_list (List.map fst fields_t))
-      in
-      Symbol_table.add_entry s.sname (struct_t, fields_t) scope.struct_symbols
+      let named_s = L.named_struct_type llcontext s.sname in
+      Printf.printf "%s\n" (Option.get (L.struct_name named_s));
+      L.struct_set_body named_s (Array.of_list (List.map fst fields_t)) false;
+      Symbol_table.add_entry s.sname
+        (named_s, List.map snd fields_t)
+        scope.struct_symbols
       |> ignore
 
 let add_rt_support llmodule scope =
