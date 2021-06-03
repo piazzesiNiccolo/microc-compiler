@@ -211,13 +211,28 @@ and codegen_access scope builder a =
             L.build_struct_gep a_val field_pos "" builder
         | None ->
             Util.raise_codegen_error @@ "Undefined struct " ^ Option.get sname
-      else Util.raise_codegen_error "Unnamed struct"
+      else assert false
 
 let add_terminator builder after =
   let terminator = L.block_terminator (L.insertion_block builder) in
   if Option.is_none terminator then after builder |> ignore else ()
 
 let rec codegen_stmt fdef scope builder stmt =
+  let build_while choose_block condition body =
+    let cond_block = L.append_block llcontext "test" fdef in
+    let body_block = L.append_block llcontext "while_body" fdef in
+    let cont_block = L.append_block llcontext "cont" fdef in
+    let cond_builder = L.builder_at_end llcontext cond_block in
+    let body_builder = L.builder_at_end llcontext body_block in
+    choose_block (cond_block, body_block)
+    |> L.build_br |> add_terminator builder |> ignore;
+    let e_val = codegen_expr scope builder condition in
+    L.build_cond_br e_val body_block cont_block cond_builder |> ignore;
+    codegen_stmt fdef scope body_builder body |> ignore;
+    L.build_br cond_block |> add_terminator body_builder;
+    L.position_at_end cont_block builder
+  in
+
   match stmt.node with
   | If (e, st1, st2) ->
       let blockt = L.append_block llcontext "then" fdef in
@@ -252,7 +267,12 @@ let rec codegen_stmt fdef scope builder stmt =
         Option.get e |> codegen_expr scope builder |> L.build_ret
         |> add_terminator builder;
       false
-  | _ -> failwith "not implemented"
+  | While (e, s) ->
+      build_while fst e s;
+      true
+  | DoWhile (e, s) ->
+      build_while snd e s;
+      true
 
 and codegen_stmtordec fdef scope builder st =
   match st.node with
@@ -294,7 +314,7 @@ let codegen_func llmodule scope func =
   List.iter2
     (build_param local_scope f_builder)
     func.formals
-    (Array.to_list (L.params f));
+    (L.params f |> Array.to_list);
   codegen_stmt f local_scope f_builder func.body |> ignore;
   add_terminator f_builder
     (if L.classify_type f_type = L.TypeKind.Void then L.build_ret_void
@@ -340,7 +360,6 @@ let codegen_topdecl llmodule scope n =
         |> List.map (fun (t, f) -> (build_llvm_type scope.struct_symbols t, f))
       in
       let named_s = L.named_struct_type llcontext s.sname in
-      Printf.printf "%s\n" (Option.get (L.struct_name named_s));
       L.struct_set_body named_s (Array.of_list (List.map fst fields_t)) false;
       Symbol_table.add_entry s.sname
         (named_s, List.map snd fields_t)
