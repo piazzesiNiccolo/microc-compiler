@@ -78,11 +78,16 @@ let bin_op = function
       L.build_fcmp L.Fcmp.Oeq
   | t1, t2, Neq when t1 = float_type && t2 = float_type ->
       L.build_fcmp L.Fcmp.One
+  | t1,t2, Equal when L.classify_type (t1) = L.TypeKind.Pointer && L.classify_type (t2) = L.TypeKind.Pointer -> L.build_icmp L.Icmp.Eq
+  | t1,t2, Neq when L.classify_type (t1) = L.TypeKind.Pointer && L.classify_type (t2) = L.TypeKind.Pointer -> L.build_icmp L.Icmp.Ne
+  | t1, t2, Equal when t1 = char_type && t2 = char_type -> L.build_icmp L.Icmp.Eq
+  | t1, t2, Neq when t1 = char_type && t2 = char_type -> L.build_icmp L.Icmp.Ne
   | t1, t2, And when t1 = bool_type && t2 = bool_type -> L.build_and
   | t1, t2, Or when t1 = bool_type && t2 = bool_type -> L.build_or
-  | _ ->
+  | t1,t2,_->
+      Printf.printf "%s %s \n" (L.string_of_lltype t1) (L.string_of_lltype t2);
       Util.raise_codegen_error
-        "Mismatch between type of global variable and initial value"
+        "Type mismatch between operands"
 
 let const_op = function
   | t, Neg when t = int_type -> L.const_neg
@@ -135,7 +140,7 @@ let build_unary_incr_or_decr builder op value =
     | _ ->
         Util.raise_codegen_error @@ "Invalid type for operator " ^ show_uop op
   in
-  let apply_op = inc_op (op, L.type_of value) in
+  let apply_op = inc_op (op, L.element_type (L.type_of value)) in
   let before = L.build_load value "" builder in
   let after = apply_op before "" builder in
   L.build_store after value builder |> ignore;
@@ -148,26 +153,38 @@ let rec codegen_expr scope builder e =
   | CLiteral c -> L.const_int char_type (Char.code c)
   | BLiteral b -> if b then llvm_true else llvm_false
   | String s -> L.const_stringz llcontext s
-  | Null -> L.const_pointer_null void_type
+  | Null -> L.undef (int_type |> L.pointer_type) 
   | Addr a -> codegen_access scope builder a
   | Access a ->
-      let a_val = codegen_access scope builder a in
-      if L.classify_type (L.type_of a_val) = L.TypeKind.Array then a_val
-      else L.build_load a_val "" builder
+      (let a_val = codegen_access scope builder a in
+      if L.type_of a_val |> L.element_type |>  L.classify_type = L.TypeKind.Array then a_val
+      else L.build_load a_val "" builder)  
   | Assign (a, e) ->
       let acc_var = codegen_access scope builder a in
       let expr_val = codegen_expr scope builder e in
-      L.build_store expr_val acc_var builder |> ignore;
-      expr_val
+      let expr_act_val = 
+      if L.is_undef expr_val 
+      then L.const_pointer_null (L.type_of acc_var|> L.element_type)
+      else expr_val in
+      L.build_store expr_act_val acc_var builder |> ignore;
+      expr_act_val
   | UnaryOp (((PreInc | PostInc | PreDec | PostDec) as op), e) ->
-      let e_val = codegen_expr scope builder e in
+      let access_e = match e.node with
+      | Access a -> a
+      | _ -> failwith "Unreachable statement" in 
+      let e_val = codegen_access scope builder access_e in
       build_unary_incr_or_decr builder op e_val
   | UnaryOp (u, e) ->
       let e_val = codegen_expr scope builder e in
       unop (L.type_of e_val, u) e_val "" builder
   | BinaryOp (b, e1, e2) ->
       let e1_val, e2_val =
-        (codegen_expr scope builder e1, codegen_expr scope builder e2)
+        (let v1,v2 = (codegen_expr scope builder e1, codegen_expr scope builder e2) in
+        let t1,t2 = L.type_of v1, L.type_of v2 in
+        match v1,v2 with 
+      | e1v,e2v when L.is_undef e1v && not(L.is_undef e2v) -> L.const_pointer_null (L.pointer_type (L.element_type t2)),v2 
+      | e1v,e2v when not(L.is_undef e1v) && L.is_undef e2v -> v1, L.const_pointer_null (L.pointer_type (L.element_type t1))
+      | e1v,e2v -> e1v, e2v )
       in
       bin_op (L.type_of e1_val, L.type_of e2_val, b) e1_val e2_val "" builder
   | Call (f, params) ->
@@ -185,16 +202,20 @@ and codegen_access scope builder a =
       match Symbol_table.lookup i scope.var_symbols with
       | Some v -> v
       | None -> Util.raise_codegen_error @@ "Variable " ^ i ^ " not defined")
-  | AccDeref e -> codegen_expr scope builder e
-  | AccIndex (a, i) ->
+  | AccDeref e -> 
+    codegen_expr scope builder e
+  | AccIndex (a, i) ->(
       let a_val = codegen_access scope builder a in
       let ind = codegen_expr scope builder i in
-      let a_type = L.classify_type (L.type_of a_val) in
-      if a_type = L.TypeKind.Array then
-        L.build_in_bounds_gep a_val [| llvm_zero; ind |]
-          (L.string_of_llvalue a_val)
-          builder
-      else L.build_gep a_val [| ind |] (L.string_of_llvalue a_val) builder
+      let a_type = L.type_of a_val in 
+      let elem_type = L.element_type a_type in 
+      Printf.printf "%s " (L.string_of_lltype elem_type);
+      match L.classify_type elem_type with 
+      |L.TypeKind.Array ->
+          L.build_in_bounds_gep a_val [|llvm_zero; ind|] "" builder
+      |_ ->
+          let load = L.build_load a_val "" builder in 
+          L.build_gep load [|ind|] "" builder )
   | AccField (a, f) ->
       let a_val = codegen_access scope builder a in
       let sname = L.type_of a_val |> L.element_type |> L.struct_name in
@@ -317,7 +338,7 @@ let codegen_func llmodule scope func =
     (L.params f |> Array.to_list);
   codegen_stmt f local_scope f_builder func.body |> ignore;
   add_terminator f_builder
-    (if L.classify_type f_type = L.TypeKind.Void then L.build_ret_void
+    (if func.typ = TypV then L.build_ret_void
     else f_type |> L.undef |> L.build_ret)
 
 let rec codegen_global_expr structs t e =
@@ -360,6 +381,7 @@ let codegen_topdecl llmodule scope n =
         |> List.map (fun (t, f) -> (build_llvm_type scope.struct_symbols t, f))
       in
       let named_s = L.named_struct_type llcontext s.sname in
+      
       L.struct_set_body named_s (Array.of_list (List.map fst fields_t)) false;
       Symbol_table.add_entry s.sname
         (named_s, List.map snd fields_t)
