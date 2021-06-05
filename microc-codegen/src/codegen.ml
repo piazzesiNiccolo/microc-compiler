@@ -157,7 +157,7 @@ let rec codegen_expr scope builder e =
   | Addr a -> codegen_access scope builder a
   | Access a ->
       (let a_val = codegen_access scope builder a in
-      if L.type_of a_val |> L.element_type |>  L.classify_type = L.TypeKind.Array then a_val
+      if L.type_of a_val |>  L.element_type |> L.classify_type = L.TypeKind.Array then a_val
       else L.build_load a_val "" builder)  
   | Assign (a, e) ->
       let acc_var = codegen_access scope builder a in
@@ -193,24 +193,29 @@ let rec codegen_expr scope builder e =
         | Some n -> n
         | None -> Util.raise_codegen_error @@ "Undefined  function  " ^ f
       in
-      let llvm_params = List.map (codegen_expr scope builder) params in
+      let llvm_params = params 
+      |> List.map (codegen_expr scope builder) 
+      |> List.map (fun e -> 
+      if L.type_of e |> L.element_type |> L.classify_type = L.TypeKind.Array 
+      then L.build_in_bounds_gep e [|llvm_zero;llvm_zero|] "" builder
+      else e )  in
       L.build_call actual_f (Array.of_list llvm_params) "" builder
 
 and codegen_access scope builder a =
   match a.node with
   | AccVar i -> (
       match Symbol_table.lookup i scope.var_symbols with
-      | Some v -> v
+      | Some v ->v
       | None -> Util.raise_codegen_error @@ "Variable " ^ i ^ " not defined")
   | AccDeref e -> 
-    codegen_expr scope builder e
+  codegen_expr scope builder e
   | AccIndex (a, i) ->(
       let a_val = codegen_access scope builder a in
       let ind = codegen_expr scope builder i in
       let a_type = L.type_of a_val in 
-      let elem_type = L.element_type a_type in 
-      Printf.printf "%s " (L.string_of_lltype elem_type);
-      match L.classify_type elem_type with 
+      let elem_type = L.element_type a_type in
+      Printf.printf "%s\n" (L.string_of_lltype elem_type);
+      match L.classify_type a_type with 
       |L.TypeKind.Array ->
           L.build_in_bounds_gep a_val [|llvm_zero; ind|] "" builder
       |_ ->
@@ -283,10 +288,11 @@ let rec codegen_stmt fdef scope builder stmt =
           if cont then codegen_stmtordec fdef new_scope builder bl else false)
         true b
   | Return e ->
-      if Option.is_none e then L.build_ret_void |> add_terminator builder
+      (if Option.is_none e then L.build_ret_void |> add_terminator builder
       else
-        Option.get e |> codegen_expr scope builder |> L.build_ret
-        |> add_terminator builder;
+      let e_val = Option.get e |> codegen_expr scope builder in
+      let v = if L.is_undef (e_val) then L.const_pointer_null (L.type_of fdef |> L.pointer_type) else e_val in
+      v |> L.build_ret  |> add_terminator builder);
       false
   | While (e, s) ->
       build_while fst e s;
