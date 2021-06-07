@@ -397,9 +397,9 @@ let codegen_func llmodule scope func =
     func.formals
     (L.params f |> Array.to_list);
   codegen_stmt f local_scope f_builder func.body |> ignore;
-  add_terminator f_builder
-    (if func.typ = TypV then L.build_ret_void
-    else f_type |> L.undef |> L.build_ret)
+  match func.typ with
+  | TypV -> add_terminator f_builder L.build_ret_void
+  | _ ->  add_terminator f_builder (ret_type |> L.undef |> L.build_ret)
 
 let rec codegen_global_expr structs t e =
   match e.node with
