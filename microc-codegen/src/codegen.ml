@@ -91,8 +91,9 @@ let bin_op = function
   | t1, t2, Neq when t1 = char_type && t2 = char_type -> L.build_icmp L.Icmp.Ne
   | t1, t2, And when t1 = bool_type && t2 = bool_type -> L.build_and
   | t1, t2, Or when t1 = bool_type && t2 = bool_type -> L.build_or
-  | t1, t2, _ ->
-      Util.raise_codegen_error "Type mismatch between operands"
+  | t1, t2, Equal when t1 = bool_type && t2 = bool_type -> L.build_icmp L.Icmp.Eq
+  | t1, t2, Neq when t1 = bool_type && t2 = bool_type -> L.build_icmp L.Icmp.Ne
+  | t1, t2, _ -> Util.raise_codegen_error "Type mismatch between operands"
 
 let const_op = function
   | t, Neg when t = int_type -> L.const_neg
@@ -131,8 +132,9 @@ let const_bin_op = function
       L.const_fcmp L.Fcmp.One
   | t1, t2, And when t1 = bool_type && t2 = bool_type -> L.const_and
   | t1, t2, Or when t1 = bool_type && t2 = bool_type -> L.const_or
-  | _ ->
-      Util.raise_codegen_error
+  | t1, t2, Equal when t1 = bool_type && t2 = bool_type -> L.const_icmp L.Icmp.Eq
+  | t1, t2, Neq when t1 = bool_type && t2 = bool_type -> L.const_icmp L.Icmp.Ne
+  | _ -> Util.raise_codegen_error
         "Mismatch between type of global variable and initial value"
 
 let build_unary_incr_or_decr builder op value =
@@ -157,15 +159,12 @@ let rec codegen_expr scope builder e =
   | FLiteral f -> L.const_float float_type f
   | CLiteral c -> L.const_int char_type (Char.code c)
   | BLiteral b -> if b then llvm_true else llvm_false
-  | String s -> L.const_stringz llcontext s
+  | String s -> L.build_global_string ( s ^ "\000") "" builder 
   | Null -> L.undef (int_type |> L.pointer_type)
   | Addr a -> codegen_access scope builder a
   | Access a ->
       let a_val = codegen_access scope builder a in
-      let at = a_val |> L.type_of |> L.element_type |> L.classify_type in
-      if (at= L.TypeKind.Array)
-      then a_val
-      else L.build_load a_val "" builder
+      L.build_load a_val "" builder
   | Assign (a, e) ->
       let acc_var = codegen_access scope builder a in
       let expr_val = codegen_expr scope builder e in
@@ -207,24 +206,34 @@ let rec codegen_expr scope builder e =
         | Some n -> n
         | None -> Util.raise_codegen_error @@ "Undefined  function  " ^ f
       in
-      let unify_params scope builder f_param param =
-        let pt = L.type_of param |> L.element_type |> L.classify_type in
-        let fpt = L.type_of f_param |> L.element_type |> L.classify_type in
-        match (pt, fpt) with
-        | t1, t2 when t1 = L.TypeKind.Array && t2 <> L.TypeKind.Array ->
-            L.build_gep param [| llvm_zero; llvm_zero |] "" builder
-        | t1, t2
-          when (t1 <> L.TypeKind.Array && t2 <> L.TypeKind.Array)
-               || (t1 = L.TypeKind.Array && t2 = L.TypeKind.Array) ->
-            param
-        | _ -> L.build_load param "" builder
+   
+      let codegen_call_expr scope builder p e =
+        match e.node with
+        | Access a -> (
+            let a_val = codegen_access scope builder a in
+            let pt = p |> L.type_of |> L.classify_type in
+            match pt with
+            | L.TypeKind.Pointer ->
+                if
+                  a_val |> L.type_of |> L.element_type |> L.classify_type
+                  = L.TypeKind.Array
+                then L.build_gep a_val [| llvm_zero; llvm_zero |] "" builder
+                else 
+                (if  a_val |> L.type_of |> L.element_type |> L.classify_type
+                  = L.TypeKind.Pointer then L.build_load a_val "" builder
+                  else a_val)
+            | _ -> L.build_load a_val "" builder)
+        | _ -> 
+          let e_val = codegen_expr scope builder e in 
+          if L.type_of e_val |> L.element_type |> L.classify_type = L.TypeKind.Array then
+          (* string literal *)
+          L.build_gep e_val [| llvm_zero; llvm_zero |] "" builder
+          else e_val
       in
-
       let fparams = L.params actual_f |> Array.to_list in
       let llvm_params =
         params
-        |> List.map (codegen_expr scope builder)
-        |> List.map2 (unify_params scope builder) fparams
+        |> List.map2 (codegen_call_expr scope builder) fparams
         |> List.map2
              (fun p e ->
                if L.is_undef e then L.const_pointer_null (L.type_of p) else e)
@@ -344,7 +353,8 @@ and codegen_stmtordec fdef scope builder st =
           = L.TypeKind.Array
         then e_val
         else (
-          L.build_store e_val var_v builder |> ignore;
+          let value = if L.is_undef e_val then L.const_pointer_null (build_llvm_type scope.struct_symbols t) else e_val in
+          L.build_store value var_v builder |> ignore;
           var_v)
       in
       let actual_value = Option.fold ~none:var_v ~some:get_init_val init in

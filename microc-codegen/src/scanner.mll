@@ -46,7 +46,7 @@ rule token = parse
     | float as fl {FLOATLIT(float_of_string fl)}
     | "true" { TRUE}
     | "false"{ FALSE}
-    |   (("'")(([' ' -'~' ]) as c)("'")) { CHARLIT(c)}
+    |  "'" { get_char lexbuf}
     | "//" { singlelinecomment lexbuf}
     | "/*" {  multilinecomment lexbuf}
     | '(' { LPAREN}
@@ -93,8 +93,21 @@ and multilinecomment = parse
     | "*/" {token lexbuf}
     | _ { multilinecomment lexbuf}
 
+and get_char = parse 
+    | '\\' '/' "'" { CHARLIT('/') }
+    | '\\' '\\' "'" {CHARLIT( '\\')}
+    | '\\' '0' "'"  {CHARLIT(Char.chr(0))}
+    | '\\' 'b' "'" {CHARLIT('\b')}
+    | '\\' 'f'  {CHARLIT('\012')}
+    | '\\' 'n' "'"{CHARLIT('\n')}
+    | '\\' 'r' "'" {CHARLIT('\r')}
+    | '\\' 't' "'" {CHARLIT('\t')}
+    |  _  [^ '\''] {Util.raise_lexer_error lexbuf "character is not terminated"}
+    | [^'\\'] as c  "'" {CHARLIT(c)}
+    | _  {Util.raise_lexer_error lexbuf @@ "Illegal character " ^Lexing.lexeme lexbuf}
+
 and get_string  buffer = parse
-    | '"'   {STRING (Buffer.contents buffer)}
+    | '"'       {STRING (Buffer.contents buffer)}
     | '\\' '/'  { Buffer.add_char buffer '/'; get_string buffer lexbuf }
     | '\\' '\\' { Buffer.add_char buffer '\\'; get_string buffer lexbuf }
     | '\\' 'b'  { Buffer.add_char buffer '\b'; get_string buffer lexbuf }
@@ -102,9 +115,10 @@ and get_string  buffer = parse
     | '\\' 'n'  { Buffer.add_char buffer '\n'; get_string buffer lexbuf }
     | '\\' 'r'  { Buffer.add_char buffer '\r'; get_string buffer lexbuf }
     | '\\' 't'  { Buffer.add_char buffer '\t'; get_string buffer lexbuf }
+    | '\\' '0'  { Buffer.add_char buffer (Char.chr(0)); get_string buffer lexbuf}
     | [^ '"' '\\']+
     { Buffer.add_string buffer (Lexing.lexeme lexbuf);
       get_string buffer lexbuf
     }
     | eof {Util.raise_lexer_error lexbuf "string is not terminated"}
-    | _  {Util.raise_lexer_error lexbuf @@ "Illegal string character" ^Lexing.lexeme lexbuf}
+    | _   {Util.raise_lexer_error lexbuf @@ "Illegal string character " ^Lexing.lexeme lexbuf}

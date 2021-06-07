@@ -25,6 +25,22 @@ let rt_support =
           formals = [];
           body = { loc = dummy_pos; node = Block []; id = 0 };
         } ) );
+    ( "print_char",
+      ( dummy_pos,
+        {
+          typ = TypV;
+          fname = "print_char";
+          formals = [ (TypC, "c") ];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
+    ( "print_float",
+      ( dummy_pos,
+        {
+          typ = TypF;
+          fname = "print_float";
+          formals = [ (TypF, "f") ];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
   ]
 
 let get_lexing_position lexbuf =

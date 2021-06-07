@@ -49,12 +49,14 @@
 %nonassoc ELSE
 
 %right ASSIGN SHORTADD SHORTDIV SHORTMIN SHORTMUL SHORTMOD
-%left OR DOT
+%left OR 
 %left AND 
 %left EQ NEQ
 %nonassoc GT LT GEQ LEQ
-%left PLUS MINUS TIMES DIVIDE MOD
+%left PLUS MINUS 
+%left TIMES DIVIDE MOD
 %nonassoc NOT ADDRESS
+%left DOT
 %nonassoc LBRACKET
 
 

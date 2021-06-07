@@ -70,18 +70,18 @@ let rec match_types loc t1 t2 =
   | t1, t2 -> t1 = t2
 
 let binaryexp_type loc op et1 et2 =
+
   match (op, et1, et2) with
   | (Add | Sub | Mult | Div | Mod | Comma), TypI, TypI -> TypI
   | (Add | Sub | Mult | Div | Mod | Comma), TypF, TypF -> TypF
   | (Equal | Neq | Less | Leq | Greater | Geq), TypI, TypI -> TypB
   | (Equal | Neq | Less | Leq | Greater | Geq), TypF, TypF -> TypB
   | (Equal | Neq), TypC, TypC -> TypB
-  | (Equal | Neq), TypA (t1, _), TypA (t2, _) when match_types loc t1 t2 -> TypB
   | (Equal | Neq), TypP _, TypNull -> TypB
   | (Equal | Neq), TypNull, TypP _ -> TypB
   | (Equal | Neq), TypP t1, TypP t2 when match_types loc t1 t2 -> TypB
-  | (And | Or), TypB, TypB -> TypB
-  | _ -> Util.raise_semantic_error loc "Type mismatch on expression"
+  | (And | Or|Equal|Neq), TypB, TypB -> TypB
+  | _ -> Util.raise_semantic_error loc @@ "Type mismatch on expression" ^ show_binop op^ " " ^ show_typ et1 ^ " " ^ show_typ et2
 
 let unaryexp_type loc u et =
   match (u, et) with
@@ -282,9 +282,10 @@ let check_topdecl scope node =
           if match_types node.loc t et then ()
           else Util.raise_semantic_error node.loc "Value of different type")
   | Structdecl s -> 
-      try Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
+      try 
       let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
       List.iter (check_var_decl struct_scope node.loc) s.fields;
+      Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
       Symbol_table.end_block struct_scope.var_symbols |> ignore
       with DuplicateEntry -> Util.raise_semantic_error node.loc @@ "Structure "^ s.sname ^ " already defined"
       

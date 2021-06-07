@@ -8,6 +8,13 @@ int getint(){
   return n;
 }
 
+void print_char(char c){
+  printf("%c",c);
+}
+
+void print_float(float f){
+  printf("%f\n",f);
+}
 void print(int n){
   printf("%d\n", n);  
 }
