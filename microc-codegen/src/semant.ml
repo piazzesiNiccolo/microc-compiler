@@ -283,9 +283,13 @@ let check_topdecl scope node =
           else Util.raise_semantic_error node.loc "Value of different type")
   | Structdecl s -> 
       try 
-      let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
-      List.iter (check_var_decl struct_scope node.loc) s.fields;
       Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
+      let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
+      List.iter (
+        fun f ->
+          match f with 
+          | (TypS(f),id) when f = s.sname -> Util.raise_semantic_error node.loc @@ "Field "^ id ^ " has incomplete type"
+          | _ ->check_var_decl struct_scope node.loc f) s.fields;
       Symbol_table.end_block struct_scope.var_symbols |> ignore
       with DuplicateEntry -> Util.raise_semantic_error node.loc @@ "Structure "^ s.sname ^ " already defined"
       
