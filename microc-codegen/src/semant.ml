@@ -55,7 +55,7 @@ let check_fun_type loc t =
   match t with
   | TypA (_, _) | TypP _ | TypNull ->
       Util.raise_semantic_error loc
-      @@ "cannot define function of type " ^ show_typ t
+      @@ "cannot define function of type " ^ Util.string_of_type t
   | _ -> ()
 
 let rec match_types loc t1 t2 =
@@ -81,7 +81,8 @@ let binaryexp_type loc op et1 et2 =
   | (Equal | Neq), TypNull, TypP _ -> TypB
   | (Equal | Neq), TypP t1, TypP t2 when match_types loc t1 t2 -> TypB
   | (And | Or|Equal|Neq), TypB, TypB -> TypB
-  | _ -> Util.raise_semantic_error loc @@ "Type mismatch on expression" ^ show_binop op^ " " ^ show_typ et1 ^ " " ^ show_typ et2
+  | _ -> Util.raise_semantic_error loc @@ 
+  "Operator " ^ Util.string_of_binop op ^ " is not defined when the operands have type "^ Util.string_of_type et1 ^ " and "^Util.string_of_type et2
 
 let unaryexp_type loc u et =
   match (u, et) with
@@ -89,16 +90,11 @@ let unaryexp_type loc u et =
   | Neg, TypF -> TypF
   | Not, TypB -> TypB
   | (PreInc | PreDec | PostInc | PostDec), (TypI | TypF) -> et
-  | (PreInc | PreDec | PostInc | PostDec), _ ->
-      Util.raise_semantic_error loc
-        "Cannot use operator pre/post increment/decrement with non numeric \
-         value"
-  | Neg, _ ->
-      Util.raise_semantic_error loc
-        "Cannot apply minus operator to non numeric value"
+  | (PreInc | PreDec | PostInc | PostDec), _
+  | Neg, _ 
   | Not, _ ->
-      Util.raise_semantic_error loc
-        "Cannot apply not operator to non boolean value"
+      Util.raise_semantic_error loc @@
+        "Operator "^Util.string_of_uop u ^ " not defined for type "^Util.string_of_type et
 
 let rec expr_type scope e =
   match e.node with
@@ -112,8 +108,8 @@ let rec expr_type scope e =
           let et = expr_type scope e in
           if match_types e.loc at et then at
           else
-            Util.raise_semantic_error e.loc
-              "Cannot assign a value of different type")
+            Util.raise_semantic_error e.loc @@
+              "Cannot assign a value of type "^Util.string_of_type et ^ " to a variable of type "^Util.string_of_type at)
   | Addr a ->
       let at = access_type scope a in
       TypP at
@@ -134,14 +130,22 @@ let rec expr_type scope e =
       let params_types = List.map (expr_type scope) params in
       match Symbol_table.lookup id scope.fun_symbols with
       | Some (_, f) ->
-          let formals_types = List.map (fun (t, i) -> t) f.formals in
-          if List.length params_types = List.length formals_types then
-            if List.for_all2 (match_types e.loc) formals_types params_types then
-              f.typ
-            else Util.raise_semantic_error e.loc "wrong parameter type"
-          else
+         ( let formals_types = List.map (fun (t, i) -> t) f.formals in
+          match List.length params_types, List.length formals_types with
+          |l1,l2 when l1 < l2 ->
             Util.raise_semantic_error e.loc
               "Missing one or more arguments in function call"
+          |l1,l2 when l1 > l2 ->  Util.raise_semantic_error e.loc
+              "Too many arguments in function call"
+          |_  ->  
+          List.iter2 
+          (fun ft pt -> 
+          if match_types e.loc ft pt 
+          then () 
+          else  Util.raise_semantic_error e.loc @@ 
+          "Function "^f.fname ^ " expects a parameter with type "^ Util.string_of_type ft ^ " but an expression with type "^Util.string_of_type pt ^" was passed" ) 
+          formals_types params_types;
+          f.typ)
       | None ->
           Util.raise_semantic_error e.loc @@ "Function " ^ id ^ "not defined")
 
@@ -227,7 +231,9 @@ and check_stmtordec scope ftype s =
   | Stmt s -> check_stmt scope ftype s
 
 let check_parameter scope loc (t, i) =
-  check_type scope.struct_symbols loc t;
+  match t with 
+  | TypV -> Util.raise_semantic_error loc @@ "Illegal void parameter "^ i
+  | _ -> check_type scope.struct_symbols loc t;
   try Symbol_table.add_entry i (loc, t) scope.var_symbols |> ignore
   with DuplicateEntry ->
     Util.raise_semantic_error loc
@@ -303,7 +309,7 @@ let check_global_properties scope =
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 
 let support_functions =
-  let init_scope = Symbol_table.empty_table |> Symbol_table.begin_block in
+  let init_scope = Symbol_table.empty_table ()  in
   List.iter
     (fun (name, f) -> Symbol_table.add_entry name f init_scope |> ignore)
     Util.rt_support;
@@ -313,8 +319,8 @@ let check (Prog topdecls) =
   let toplevel_scope =
     {
       fun_symbols = support_functions;
-      var_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
-      struct_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
+      var_symbols = Symbol_table.empty_table ();
+      struct_symbols = Symbol_table.empty_table ();
     }
   in
   List.iter (check_topdecl toplevel_scope) topdecls;

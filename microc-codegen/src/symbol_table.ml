@@ -2,7 +2,7 @@ exception DuplicateEntry
 
 type 'a t = Dummy | Table of 'a t * (string, 'a) Hashtbl.t
 
-let empty_table = Dummy
+let empty_table () =  Table(Dummy,Hashtbl.create 0)
 
 let begin_block parent =
   Table(parent,Hashtbl.create 0)

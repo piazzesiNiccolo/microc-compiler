@@ -468,9 +468,9 @@ let to_ir (Prog topdecls) =
   let llmodule = L.create_module llcontext module_name in
   let init_scope =
     {
-      fun_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
-      var_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
-      struct_symbols = Symbol_table.empty_table |> Symbol_table.begin_block;
+      fun_symbols = Symbol_table.empty_table ();
+      var_symbols = Symbol_table.empty_table ();
+      struct_symbols = Symbol_table.empty_table ();
     }
   in
   add_rt_support llmodule init_scope;

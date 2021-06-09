@@ -2,7 +2,7 @@ exception DuplicateEntry
 
 type 'a t
 
-val empty_table : 'a t
+val empty_table : unit -> 'a t
 
 val begin_block : 'a t -> 'a t
 
