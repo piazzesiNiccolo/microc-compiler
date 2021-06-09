@@ -30,10 +30,9 @@ let rec check_type structs loc t =
   | TypP TypV -> Util.raise_semantic_error loc "Trying to define a void pointer"
   | TypP t -> check_type structs loc t
   | TypS s -> (
-    match Symbol_table.lookup s structs with
-    | Some _ -> ()
-    | None -> Util.raise_semantic_error loc @@ "Undefined structure "^s
-  )
+      match Symbol_table.lookup s structs with
+      | Some _ -> ()
+      | None -> Util.raise_semantic_error loc @@ "Undefined structure " ^ s)
   | _ -> ()
 
 let check_var_type structs loc t =
@@ -63,15 +62,14 @@ let rec match_types loc t1 t2 =
   | TypA (t1, Some v), TypA (t2, Some v2) when v = v2 -> match_types loc t1 t2
   | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 ->
       Util.raise_semantic_error loc "Array size must be the same"
-  | TypA (t1, None), TypA (t2, _)
-  | TypA (t1, _), TypA (t2, None) -> match_types loc t1 t2
+  | TypA (t1, None), TypA (t2, _) | TypA (t1, _), TypA (t2, None) ->
+      match_types loc t1 t2
   | TypP _, TypNull -> true
   | TypNull, TypP _ -> true
   | TypP t1, TypP t2 -> match_types loc t1 t2
   | t1, t2 -> t1 = t2
 
 let binaryexp_type loc op et1 et2 =
-
   match (op, et1, et2) with
   | (Add | Sub | Mult | Div | Mod | Comma), TypI, TypI -> TypI
   | (Add | Sub | Mult | Div | Mod | Comma), TypF, TypF -> TypF
@@ -81,9 +79,12 @@ let binaryexp_type loc op et1 et2 =
   | (Equal | Neq), TypP _, TypNull -> TypB
   | (Equal | Neq), TypNull, TypP _ -> TypB
   | (Equal | Neq), TypP t1, TypP t2 when match_types loc t1 t2 -> TypB
-  | (And | Or|Equal|Neq), TypB, TypB -> TypB
-  | _ -> Util.raise_semantic_error loc @@ 
-  "Operator " ^ Util.string_of_binop op ^ " is not defined when the operands have type "^ Util.string_of_type et1 ^ " and "^Util.string_of_type et2
+  | (And | Or | Equal | Neq), TypB, TypB -> TypB
+  | _ ->
+      Util.raise_semantic_error loc
+      @@ "Operator " ^ Util.string_of_binop op
+      ^ " is not defined when the operands have type " ^ Util.string_of_type et1
+      ^ " and " ^ Util.string_of_type et2
 
 let unaryexp_type loc u et =
   match (u, et) with
@@ -91,11 +92,10 @@ let unaryexp_type loc u et =
   | Neg, TypF -> TypF
   | Not, TypB -> TypB
   | (PreInc | PreDec | PostInc | PostDec), (TypI | TypF) -> et
-  | (PreInc | PreDec | PostInc | PostDec), _
-  | Neg, _ 
-  | Not, _ ->
-      Util.raise_semantic_error loc @@
-        "Operator "^Util.string_of_uop u ^ " not defined for type "^Util.string_of_type et
+  | (PreInc | PreDec | PostInc | PostDec), _ | Neg, _ | Not, _ ->
+      Util.raise_semantic_error loc
+      @@ "Operator " ^ Util.string_of_uop u ^ " not defined for type "
+      ^ Util.string_of_type et
 
 let rec expr_type scope e =
   match e.node with
@@ -109,8 +109,9 @@ let rec expr_type scope e =
           let et = expr_type scope e in
           if match_types e.loc at et then at
           else
-            Util.raise_semantic_error e.loc @@
-              "Cannot assign a value of type "^Util.string_of_type et ^ " to a variable of type "^Util.string_of_type at)
+            Util.raise_semantic_error e.loc
+            @@ "Cannot assign a value of type " ^ Util.string_of_type et
+            ^ " to a variable of type " ^ Util.string_of_type at)
   | Addr a ->
       let at = access_type scope a in
       TypP at
@@ -130,23 +131,26 @@ let rec expr_type scope e =
   | Call (id, params) -> (
       let params_types = List.map (expr_type scope) params in
       match Symbol_table.lookup id scope.fun_symbols with
-      | Some (_, f) ->
-         ( let formals_types = List.map (fun (t, i) -> t) f.formals in
-          match List.length params_types, List.length formals_types with
-          |l1,l2 when l1 < l2 ->
-            Util.raise_semantic_error e.loc
-              "Missing one or more arguments in function call"
-          |l1,l2 when l1 > l2 ->  Util.raise_semantic_error e.loc
-              "Too many arguments in function call"
-          |_  ->  
-          List.iter2 
-          (fun ft pt -> 
-          if match_types e.loc ft pt 
-          then () 
-          else  Util.raise_semantic_error e.loc @@ 
-          "Function "^f.fname ^ " expects a parameter with type "^ Util.string_of_type ft ^ " but an expression with type "^Util.string_of_type pt ^" was passed" ) 
-          formals_types params_types;
-          f.typ)
+      | Some (_, f) -> (
+          let formals_types = List.map (fun (t, i) -> t) f.formals in
+          match (List.length params_types, List.length formals_types) with
+          | l1, l2 when l1 < l2 ->
+              Util.raise_semantic_error e.loc
+                "Missing one or more arguments in function call"
+          | l1, l2 when l1 > l2 ->
+              Util.raise_semantic_error e.loc
+                "Too many arguments in function call"
+          | _ ->
+              List.iter2
+                (fun ft pt ->
+                  if match_types e.loc ft pt then ()
+                  else
+                    Util.raise_semantic_error e.loc
+                    @@ "Function " ^ f.fname ^ " expects a parameter with type "
+                    ^ Util.string_of_type ft ^ " but an expression with type "
+                    ^ Util.string_of_type pt ^ " was passed")
+                formals_types params_types;
+              f.typ)
       | None ->
           Util.raise_semantic_error e.loc @@ "Function " ^ id ^ "not defined")
 
@@ -173,16 +177,23 @@ and access_type scope a =
           )
       | _ -> Util.raise_semantic_error a.loc "Index of array must be an integer"
       )
-  | AccField(s, f) -> 
-    match access_type scope s with
-    | TypS(s) ->
-      (match Symbol_table.lookup s scope.struct_symbols with
-        | Some (_,s) ->
-          (match List.find_opt (fun (t,i) -> i = f) s.fields with
-            | Some (t, _) -> t
-            | None -> Util.raise_semantic_error a.loc @@ "Field "^ f^" does not exists in structure "^ s.sname)       
-        | None -> Util.raise_semantic_error a.loc @@ "Structure "^s^" does not exists" )
-    | _ -> Util.raise_semantic_error a.loc "Trying to access field of non structure variable"
+  | AccField (s, f) -> (
+      match access_type scope s with
+      | TypS s -> (
+          match Symbol_table.lookup s scope.struct_symbols with
+          | Some (_, s) -> (
+              match List.find_opt (fun (t, i) -> i = f) s.fields with
+              | Some (t, _) -> t
+              | None ->
+                  Util.raise_semantic_error a.loc
+                  @@ "Field " ^ f ^ " does not exists in structure " ^ s.sname)
+          | None ->
+              Util.raise_semantic_error a.loc
+              @@ "Structure " ^ s ^ " does not exists")
+      | _ ->
+          Util.raise_semantic_error a.loc
+            "Trying to access field of non structure variable")
+
 let rec check_stmt scope ftype s =
   match s.node with
   | If (e, s1, s2) ->
@@ -219,26 +230,51 @@ and check_stmtordec scope ftype s =
   match s.node with
   | Dec (t, i, None) -> check_var_decl scope s.loc (t, i)
   | Dec (t, i, Some e) -> (
-      check_var_decl scope s.loc (t, i);
       match (t, e.node) with
-      | TypA (TypC, _), String _ -> ()
-      | _ ->
+      | TypA (TypC, None), String str -> (
+          let length = str |> String.length in
+          try
+            Symbol_table.add_entry i
+              (s.loc, TypA (TypC, Some (length + 1)))
+              scope.var_symbols
+            |> ignore
+          with DuplicateEntry ->
+            Util.raise_semantic_error s.loc
+            @@ "Variable " ^ i ^ " already defined in current scope")
+      | TypA (TypC, Some v), String str -> (
+          let length = str |> String.length in
+          if length+1 <> v then Util.raise_semantic_error  s.loc @@
+          "Null terminated string length is "^(length+1|> string_of_int) ^" but array was declared with size "^(v |> string_of_int)
+          else
+          try
+            Symbol_table.add_entry i
+              (s.loc, TypA (TypC, Some (length + 1)))
+              scope.var_symbols
+            |> ignore
+          with DuplicateEntry ->
+            Util.raise_semantic_error s.loc
+            @@ "Variable " ^ i ^ " already defined in current scope")
+      | _ -> (
+          check_var_decl scope s.loc (t, i);
           let et = expr_type scope e in
           match et with
-          | TypA(_,_) -> Util.raise_semantic_error s.loc "Array is not a valid value initializer"
-          | _ -> 
-            if match_types s.loc t et then ()
-            else Util.raise_semantic_error s.loc "Value of different type")
+          | TypA (_, _) ->
+              Util.raise_semantic_error s.loc
+                "Array is not a valid value initializer"
+          | _ ->
+              if match_types s.loc t et then ()
+              else Util.raise_semantic_error s.loc "Value of different type"))
   | Stmt s -> check_stmt scope ftype s
 
 let check_parameter scope loc (t, i) =
-  match t with 
-  | TypV -> Util.raise_semantic_error loc @@ "Illegal void parameter "^ i
-  | _ -> check_type scope.struct_symbols loc t;
-  try Symbol_table.add_entry i (loc, t) scope.var_symbols |> ignore
-  with DuplicateEntry ->
-    Util.raise_semantic_error loc
-    @@ "Parameter " ^ i ^ " already defined in current scope"
+  match t with
+  | TypV -> Util.raise_semantic_error loc @@ "Illegal void parameter " ^ i
+  | _ -> (
+      check_type scope.struct_symbols loc t;
+      try Symbol_table.add_entry i (loc, t) scope.var_symbols |> ignore
+      with DuplicateEntry ->
+        Util.raise_semantic_error loc
+        @@ "Parameter " ^ i ^ " already defined in current scope")
 
 let check_func f scope loc =
   check_fun_type loc f.typ;
@@ -253,13 +289,11 @@ let check_func f scope loc =
       scope with
       fun_symbols = rec_scope;
       var_symbols = Symbol_table.begin_block scope.var_symbols;
-      
     }
   in
   List.iter (check_parameter new_scope loc) f.formals;
   check_stmt new_scope f.typ f.body;
   Symbol_table.end_block new_scope.var_symbols |> ignore
-
 
 let rec global_expr_type scope loc e =
   match e.node with
@@ -288,29 +322,39 @@ let check_topdecl scope node =
           let et = global_expr_type scope node.loc e in
           if match_types node.loc t et then ()
           else Util.raise_semantic_error node.loc "Value of different type")
-  | Structdecl s -> 
-      try 
-      Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols |> ignore;
-      let struct_scope = {scope with var_symbols = Symbol_table.begin_block scope.var_symbols} in 
-      List.iter (
-        fun f ->
-          match f with 
-          | (TypS(f),id) when f = s.sname -> Util.raise_semantic_error node.loc @@ "Field "^ id ^ " has incomplete type"
-          | _ ->check_var_decl struct_scope node.loc f) s.fields;
-      Symbol_table.end_block struct_scope.var_symbols |> ignore
-      with DuplicateEntry -> Util.raise_semantic_error node.loc @@ "Structure "^ s.sname ^ " already defined"
-      
+  | Structdecl s -> (
+      try
+        Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols
+        |> ignore;
+        let struct_scope =
+          {
+            scope with
+            var_symbols = Symbol_table.begin_block scope.var_symbols;
+          }
+        in
+        List.iter
+          (fun f ->
+            match f with
+            | TypS f, id when f = s.sname ->
+                Util.raise_semantic_error node.loc
+                @@ "Field " ^ id ^ " has incomplete type"
+            | _ -> check_var_decl struct_scope node.loc f)
+          s.fields;
+        Symbol_table.end_block struct_scope.var_symbols |> ignore
+      with DuplicateEntry ->
+        Util.raise_semantic_error node.loc
+        @@ "Structure " ^ s.sname ^ " already defined")
 
 let check_global_properties scope =
   let m = Symbol_table.lookup "main" scope.fun_symbols in
   match m with
   | Some (_, { typ = TypV; fname = "main"; formals = [] }) -> ()
   | Some (_, { typ = TypI; fname = "main"; formals = [] }) -> ()
-  | Some (loc,_) -> Util.raise_semantic_error loc "Invalid signature of main"
+  | Some (loc, _) -> Util.raise_semantic_error loc "Invalid signature of main"
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 
 let support_functions =
-  let init_scope = Symbol_table.empty_table ()  in
+  let init_scope = Symbol_table.empty_table () in
   List.iter
     (fun (name, f) -> Symbol_table.add_entry name f init_scope |> ignore)
     Util.rt_support;
@@ -326,5 +370,3 @@ let check (Prog topdecls) =
   in
   List.iter (check_topdecl toplevel_scope) topdecls;
   check_global_properties toplevel_scope |> ignore
-
-   
