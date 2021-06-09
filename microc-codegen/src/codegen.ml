@@ -249,13 +249,21 @@ and codegen_access scope builder a =
       | None -> Util.raise_codegen_error @@ "Variable " ^ i ^ " not defined")
   | AccDeref e -> codegen_expr scope builder e
   | AccIndex (a, i) ->
-      let a_val = codegen_access scope builder a in
+     ( let a_val = codegen_access scope builder a in
       let ind = codegen_expr scope builder i in
-      if
-        a_val |> L.type_of |> L.element_type |> L.classify_type
-        = L.TypeKind.Array
-      then L.build_gep a_val [| llvm_zero; ind |] "" builder
-      else L.build_gep a_val [| ind |] "" builder
+      let at = a_val |> L.type_of 
+      in
+      match   at |> L.classify_type with 
+      |L.TypeKind.Pointer -> 
+        (match at |> L.element_type |> L.classify_type with
+        
+        |L.TypeKind.Array ->
+          L.build_in_bounds_gep a_val [| llvm_zero; ind |] "" builder
+        | _ -> 
+           let load_val = Llvm.build_load a_val "" builder in
+           Llvm.build_in_bounds_gep load_val [|ind|] "" builder)
+      | _ ->
+       L.build_in_bounds_gep a_val [|llvm_zero; ind |] "" builder)
   | AccField (a, f) ->
       let a_val = codegen_access scope builder a in
       let sname = L.type_of a_val |> L.element_type |> L.struct_name in
@@ -347,15 +355,15 @@ and codegen_stmtordec fdef scope builder st =
         L.build_alloca (build_llvm_type scope.struct_symbols t) i builder
       in
       let get_init_val e =
-        let e_val = codegen_expr scope builder e in
+        (let e_val = codegen_expr scope builder e in
         if
           L.type_of e_val |> L.element_type |> L.classify_type
           = L.TypeKind.Array
         then e_val
-        else (
-          let value = if L.is_undef e_val then L.const_pointer_null (build_llvm_type scope.struct_symbols t) else e_val in
-          L.build_store value var_v builder |> ignore;
-          var_v)
+        else 
+        let value = if L.is_undef e_val then L.const_pointer_null (build_llvm_type scope.struct_symbols t) else e_val in
+        L.build_store value var_v builder |> ignore;
+        var_v)
       in
       let actual_value = Option.fold ~none:var_v ~some:get_init_val init in
       Symbol_table.add_entry i actual_value scope.var_symbols |> ignore;
@@ -384,7 +392,12 @@ let codegen_func llmodule scope func =
   let f_builder = L.entry_block f |> L.builder_at_end llcontext in
   let build_param scope builder (t, i) p =
     match t with
-    | TypA (_, _) -> Symbol_table.add_entry i p scope.var_symbols |> ignore
+    | TypA (t1, _) ->
+     let l =
+          L.build_alloca (build_llvm_type scope.struct_symbols t1 |> L.pointer_type) "" builder
+        in
+        Symbol_table.add_entry i l scope.var_symbols |> ignore;
+        L.build_store p l builder |> ignore
     | _ ->
         let l =
           L.build_alloca (build_llvm_type scope.struct_symbols t) "" builder

@@ -55,7 +55,7 @@ let check_fun_type loc t =
   match t with
   | TypA (_, _) | TypP _ | TypNull ->
       Util.raise_semantic_error loc
-      @@ "cannot define function of type " ^ Util.string_of_type t
+      @@ "Illegal function type " ^ Util.string_of_type t
   | _ -> ()
 
 let rec match_types loc t1 t2 =
@@ -63,7 +63,8 @@ let rec match_types loc t1 t2 =
   | TypA (t1, Some v), TypA (t2, Some v2) when v = v2 -> match_types loc t1 t2
   | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 ->
       Util.raise_semantic_error loc "Array size must be the same"
-  | TypA (t1, None), TypA (t2, _) -> match_types loc t1 t2
+  | TypA (t1, None), TypA (t2, _)
+  | TypA (t1, _), TypA (t2, None) -> match_types loc t1 t2
   | TypP _, TypNull -> true
   | TypNull, TypP _ -> true
   | TypP t1, TypP t2 -> match_types loc t1 t2
