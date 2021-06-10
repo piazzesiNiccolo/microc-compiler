@@ -13,6 +13,25 @@ type symbols = {
   struct_symbols : struct_info Symbol_table.t;
 }
 
+let string_var_initialization loc vars array_length id string =
+  try
+    let length = string |> String.length in
+    if array_length = 0 then
+      Symbol_table.add_entry id (loc, TypA (TypC, Some (length + 1))) vars
+      |> ignore
+    else if length + 1 > array_length then
+      Util.raise_semantic_error loc
+      @@ "Null terminated string length is "
+      ^ (length + 1 |> string_of_int)
+      ^ " but array was declared with size "
+      ^ (array_length |> string_of_int)
+    else
+      Symbol_table.add_entry id (loc, TypA (TypC, Some array_length)) vars
+      |> ignore
+  with DuplicateEntry ->
+    Util.raise_semantic_error loc
+    @@ "Variable " ^ id ^ " already defined in current scope"
+
 let rec defined_type_size t =
   match t with
   | TypA (t, Some _) -> defined_type_size t
@@ -231,29 +250,10 @@ and check_stmtordec scope ftype s =
   | Dec (t, i, None) -> check_var_decl scope s.loc (t, i)
   | Dec (t, i, Some e) -> (
       match (t, e.node) with
-      | TypA (TypC, None), String str -> (
-          let length = str |> String.length in
-          try
-            Symbol_table.add_entry i
-              (s.loc, TypA (TypC, Some (length + 1)))
-              scope.var_symbols
-            |> ignore
-          with DuplicateEntry ->
-            Util.raise_semantic_error s.loc
-            @@ "Variable " ^ i ^ " already defined in current scope")
-      | TypA (TypC, Some v), String str -> (
-          let length = str |> String.length in
-          if length+1 <> v then Util.raise_semantic_error  s.loc @@
-          "Null terminated string length is "^(length+1|> string_of_int) ^" but array was declared with size "^(v |> string_of_int)
-          else
-          try
-            Symbol_table.add_entry i
-              (s.loc, TypA (TypC, Some (length + 1)))
-              scope.var_symbols
-            |> ignore
-          with DuplicateEntry ->
-            Util.raise_semantic_error s.loc
-            @@ "Variable " ^ i ^ " already defined in current scope")
+      | TypA (TypC, None), String str ->
+          string_var_initialization s.loc scope.var_symbols 0 i str
+      | TypA (TypC, Some v), String str ->
+          string_var_initialization s.loc scope.var_symbols v i str
       | _ -> (
           check_var_decl scope s.loc (t, i);
           let et = expr_type scope e in
@@ -315,10 +315,14 @@ let check_topdecl scope node =
   | Fundecl f -> check_func f scope node.loc
   | Vardec (t, i, None) -> check_var_decl scope node.loc (t, i)
   | Vardec (t, i, Some e) -> (
-      check_var_decl scope node.loc (t, i);
+     
       match (t, e.node) with
-      | TypA (TypC, _), String _ -> ()
-      | _ ->
+      | TypA (TypC, None), String str ->
+          string_var_initialization node.loc scope.var_symbols 0 i str
+      | TypA (TypC, Some v), String str ->
+          string_var_initialization node.loc scope.var_symbols v i str
+      | _ -> 
+          check_var_decl scope node.loc (t, i);
           let et = global_expr_type scope node.loc e in
           if match_types node.loc t et then ()
           else Util.raise_semantic_error node.loc "Value of different type")
