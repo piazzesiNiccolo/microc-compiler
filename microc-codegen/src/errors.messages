@@ -1,0 +1,1815 @@
+program: STRUCT ID LBRACE RBRACE WHILE
+##
+## Ends in an error in state: 27.
+##
+## topdec -> STRUCT ID LBRACE list(terminated(vardecl,SEMI)) RBRACE . SEMI [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+##
+## The known suffix of the stack is as follows:
+## STRUCT ID LBRACE list(terminated(vardecl,SEMI)) RBRACE
+##
+
+Expected ; before  token while
+
+program: STRUCT ID LBRACE VOID ID RPAREN
+##
+## Ends in an error in state: 11.
+##
+## list(terminated(vardecl,SEMI)) -> vardecl . SEMI list(terminated(vardecl,SEMI)) [ RBRACE ]
+##
+## The known suffix of the stack is as follows:
+## vardecl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 24, spurious reduction of production vardecl -> typ vardesc
+##
+
+expected ; before token )
+
+program: STRUCT ID LBRACE VOID ID SEMI WHILE
+##
+## Ends in an error in state: 12.
+##
+## list(terminated(vardecl,SEMI)) -> vardecl SEMI . list(terminated(vardecl,SEMI)) [ RBRACE ]
+##
+## The known suffix of the stack is as follows:
+## vardecl SEMI
+##
+
+Illegal token while inside struct declaration. Expected list of variable declarations
+
+program: STRUCT ID LBRACE WHILE
+##
+## Ends in an error in state: 4.
+##
+## topdec -> STRUCT ID LBRACE . list(terminated(vardecl,SEMI)) RBRACE SEMI [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+##
+## The known suffix of the stack is as follows:
+## STRUCT ID LBRACE
+##
+
+Illegal token while inside struct declaration. Expected list of variable declarations
+
+program: STRUCT ID WHILE
+##
+## Ends in an error in state: 3.
+##
+## topdec -> STRUCT ID . LBRACE list(terminated(vardecl,SEMI)) RBRACE SEMI [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+## typ -> STRUCT ID . [ TIMES LPAREN ID ]
+##
+## The known suffix of the stack is as follows:
+## STRUCT ID
+##
+
+Missing block of variable declarations in struct declaration 
+
+program: STRUCT WHILE
+##
+## Ends in an error in state: 2.
+##
+## topdec -> STRUCT . ID LBRACE list(terminated(vardecl,SEMI)) RBRACE SEMI [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+## typ -> STRUCT . ID [ TIMES LPAREN ID ]
+##
+## The known suffix of the stack is as follows:
+## STRUCT
+##
+
+Illegal identifier WHILE
+
+program: VOID ID ASSIGN ADDRESS ID WHILE
+##
+## Ends in an error in state: 56.
+##
+## aexpr -> ADDRESS lexpr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## ADDRESS lexpr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ADDRESS WHILE
+##
+## Ends in an error in state: 55.
+##
+## aexpr -> ADDRESS . lexpr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## ADDRESS
+##
+
+
+Expected identifier after token *
+
+
+program: VOID ID ASSIGN DECREMENT ID WHILE
+##
+## Ends in an error in state: 53.
+##
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+## rexpr -> DECREMENT lexpr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## DECREMENT lexpr
+##
+
+Missing ; after variable declaration
+
+
+program: VOID ID ASSIGN DECREMENT WHILE
+##
+## Ends in an error in state: 52.
+##
+## rexpr -> DECREMENT . lexpr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## DECREMENT
+##
+
+Expected identifier after token --
+
+program: VOID ID ASSIGN ID ASSIGN TRUE WHILE
+##
+## Ends in an error in state: 102.
+##
+## rexpr -> lexpr ASSIGN expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr ASSIGN expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID ASSIGN WHILE
+##
+## Ends in an error in state: 101.
+##
+## rexpr -> lexpr ASSIGN . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr ASSIGN
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID DOT WHILE
+##
+## Ends in an error in state: 46.
+##
+## lexpr -> lexpr DOT . ID [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr DOT
+##
+
+Missing field name in struct access
+
+program: VOID ID ASSIGN ID LBRACKET TRUE WHILE
+##
+## Ends in an error in state: 112.
+##
+## lexpr -> lexpr LBRACKET expr . RBRACKET [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## rexpr -> expr . PLUS expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr LBRACKET expr
+##
+
+Unclosed brackets in array access
+
+program: VOID ID ASSIGN ID LBRACKET WHILE
+##
+## Ends in an error in state: 37.
+##
+## lexpr -> lexpr LBRACKET . expr RBRACKET [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr LBRACKET
+##
+
+Unclosed brackets in array access
+
+program: VOID ID ASSIGN ID LPAREN TRUE COMMA WHILE
+##
+## Ends in an error in state: 104.
+##
+## separated_nonempty_list(COMMA,expr) -> expr COMMA . separated_nonempty_list(COMMA,expr) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## expr COMMA
+##
+
+Illegal identifier while
+
+program: VOID ID ASSIGN ID LPAREN TRUE WHILE
+##
+## Ends in an error in state: 103.
+##
+## rexpr -> expr . PLUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## separated_nonempty_list(COMMA,expr) -> expr . [ RPAREN ]
+## separated_nonempty_list(COMMA,expr) -> expr . COMMA separated_nonempty_list(COMMA,expr) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## expr
+##
+
+Unclosed parentheses in function call
+
+program: VOID ID ASSIGN ID LPAREN WHILE
+##
+## Ends in an error in state: 49.
+##
+## rexpr -> ID LPAREN . loption(separated_nonempty_list(COMMA,expr)) RPAREN [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## ID LPAREN
+##
+
+Unclosed parentheses in function call
+
+program: VOID ID ASSIGN ID SHORTADD TRUE WHILE
+##
+## Ends in an error in state: 98.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr SHORTADD expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTADD expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTADD WHILE
+##
+## Ends in an error in state: 97.
+##
+## rexpr -> lexpr SHORTADD . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTADD
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTDIV TRUE WHILE
+##
+## Ends in an error in state: 96.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr SHORTDIV expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTDIV expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTDIV WHILE
+##
+## Ends in an error in state: 95.
+##
+## rexpr -> lexpr SHORTDIV . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTDIV
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMIN TRUE WHILE
+##
+## Ends in an error in state: 94.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr SHORTMIN expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMIN expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMIN WHILE
+##
+## Ends in an error in state: 93.
+##
+## rexpr -> lexpr SHORTMIN . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMIN
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMOD TRUE WHILE
+##
+## Ends in an error in state: 92.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr SHORTMOD expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMOD expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMOD WHILE
+##
+## Ends in an error in state: 91.
+##
+## rexpr -> lexpr SHORTMOD . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMOD
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMUL TRUE WHILE
+##
+## Ends in an error in state: 63.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr SHORTMUL expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMUL expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID SHORTMUL WHILE
+##
+## Ends in an error in state: 62.
+##
+## rexpr -> lexpr SHORTMUL . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr SHORTMUL
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN ID WHILE
+##
+## Ends in an error in state: 48.
+##
+## lexpr -> ID . [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## rexpr -> ID . LPAREN loption(separated_nonempty_list(COMMA,expr)) RPAREN [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## ID
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN INCREMENT ID WHILE
+##
+## Ends in an error in state: 45.
+##
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET GT GEQ EQ DOT DIVIDE COMMA AND ]
+## rexpr -> INCREMENT lexpr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## INCREMENT lexpr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN INCREMENT WHILE
+##
+## Ends in an error in state: 44.
+##
+## rexpr -> INCREMENT . lexpr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## INCREMENT
+##
+
+Illegalo identifier while, maybe you missed a ; ?
+
+program: VOID ID ASSIGN LPAREN ID RPAREN DO
+##
+## Ends in an error in state: 61.
+##
+## expr -> lexpr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## rexpr -> lexpr . ASSIGN expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . SHORTADD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . SHORTDIV expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . SHORTMIN expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . SHORTMUL expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . SHORTMOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . INCREMENT [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> lexpr . DECREMENT [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## lexpr
+##
+
+missing function name in call
+
+program: VOID ID ASSIGN LPAREN ID SEMI
+##
+## Ends in an error in state: 108.
+##
+## expr -> lexpr . [ TIMES PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## lexpr -> LPAREN lexpr . RPAREN [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD RPAREN PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT ASSIGN AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD RPAREN PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT ASSIGN AND ]
+## rexpr -> lexpr . ASSIGN expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . SHORTADD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . SHORTDIV expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . SHORTMIN expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . SHORTMUL expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . SHORTMOD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . INCREMENT [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> lexpr . DECREMENT [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN lexpr
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 48, spurious reduction of production lexpr -> ID
+##
+
+missing function name in call
+
+program: VOID ID ASSIGN LPAREN TRUE WHILE
+##
+## Ends in an error in state: 106.
+##
+## aexpr -> LPAREN rexpr . RPAREN [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## expr -> rexpr . [ TIMES PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN rexpr
+##
+
+missing function name in call
+
+program: VOID ID ASSIGN LPAREN WHILE
+##
+## Ends in an error in state: 42.
+##
+## aexpr -> LPAREN . rexpr RPAREN [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## lexpr -> LPAREN . lexpr RPAREN [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+missing function name in call
+
+program: VOID ID ASSIGN MINUS TRUE WHILE
+##
+## Ends in an error in state: 110.
+##
+## rexpr -> MINUS expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## MINUS expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN MINUS WHILE
+##
+## Ends in an error in state: 41.
+##
+## rexpr -> MINUS . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## MINUS
+##
+
+missing value after token -
+program: VOID ID ASSIGN NOT WHILE
+##
+## Ends in an error in state: 40.
+##
+## rexpr -> NOT . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## NOT
+##
+missing value after token !
+
+program: VOID ID ASSIGN TIMES ID WHILE
+##
+## Ends in an error in state: 114.
+##
+## lexpr -> TIMES lexpr . [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## lexpr -> lexpr . DOT ID [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## TIMES lexpr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TIMES LPAREN ID WHILE
+##
+## Ends in an error in state: 35.
+##
+## lexpr -> LPAREN lexpr . RPAREN [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+## lexpr -> lexpr . LBRACKET expr RBRACKET [ RPAREN LBRACKET DOT ]
+## lexpr -> lexpr . DOT ID [ RPAREN LBRACKET DOT ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN lexpr
+##
+
+Unclosed parentheses in assignment
+
+program: VOID ID ASSIGN TIMES LPAREN WHILE
+##
+## Ends in an error in state: 33.
+##
+## lexpr -> LPAREN . lexpr RPAREN [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+unclosed parentheses in assignment
+
+program: VOID ID ASSIGN TIMES WHILE
+##
+## Ends in an error in state: 32.
+##
+## lexpr -> TIMES . lexpr [ TIMES SHORTMUL SHORTMOD SHORTMIN SHORTDIV SHORTADD SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ LBRACKET INCREMENT GT GEQ EQ DOT DIVIDE DECREMENT COMMA ASSIGN AND ]
+##
+## The known suffix of the stack is as follows:
+## TIMES
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE AND TRUE WHILE
+##
+## Ends in an error in state: 90.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr AND expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr AND expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE AND WHILE
+##
+## Ends in an error in state: 89.
+##
+## rexpr -> expr AND . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr AND
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE DIVIDE WHILE
+##
+## Ends in an error in state: 71.
+##
+## rexpr -> expr DIVIDE . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr DIVIDE
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE EQ TRUE WHILE
+##
+## Ends in an error in state: 88.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr EQ expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr EQ expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE EQ WHILE
+##
+## Ends in an error in state: 87.
+##
+## rexpr -> expr EQ . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr EQ
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE GEQ TRUE WHILE
+##
+## Ends in an error in state: 86.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr GEQ expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr GEQ expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE GEQ WHILE
+##
+## Ends in an error in state: 85.
+##
+## rexpr -> expr GEQ . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr GEQ
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE GT TRUE WHILE
+##
+## Ends in an error in state: 84.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr GT expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr GT expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE GT WHILE
+##
+## Ends in an error in state: 83.
+##
+## rexpr -> expr GT . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr GT
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE LEQ TRUE WHILE
+##
+## Ends in an error in state: 82.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr LEQ expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr LEQ expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE LEQ WHILE
+##
+## Ends in an error in state: 81.
+##
+## rexpr -> expr LEQ . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr LEQ
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE LT TRUE WHILE
+##
+## Ends in an error in state: 80.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr LT expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr LT expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE LT WHILE
+##
+## Ends in an error in state: 79.
+##
+## rexpr -> expr LT . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr LT
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE MINUS TRUE WHILE
+##
+## Ends in an error in state: 78.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr MINUS expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr MINUS expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE MINUS WHILE
+##
+## Ends in an error in state: 77.
+##
+## rexpr -> expr MINUS . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr MINUS
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE MOD WHILE
+##
+## Ends in an error in state: 69.
+##
+## rexpr -> expr MOD . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr MOD
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE NEQ TRUE WHILE
+##
+## Ends in an error in state: 76.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr NEQ expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr NEQ expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE NEQ WHILE
+##
+## Ends in an error in state: 75.
+##
+## rexpr -> expr NEQ . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr NEQ
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE OR TRUE WHILE
+##
+## Ends in an error in state: 74.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr OR expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr OR expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE OR WHILE
+##
+## Ends in an error in state: 73.
+##
+## rexpr -> expr OR . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr OR
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE PLUS TRUE WHILE
+##
+## Ends in an error in state: 68.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr PLUS expr . [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr PLUS expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN TRUE PLUS WHILE
+##
+## Ends in an error in state: 67.
+##
+## rexpr -> expr PLUS . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr PLUS
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE TIMES WHILE
+##
+## Ends in an error in state: 64.
+##
+## rexpr -> expr TIMES . expr [ TIMES SEMI RPAREN RBRACKET PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE COMMA AND ]
+##
+## The known suffix of the stack is as follows:
+## expr TIMES
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID ASSIGN TRUE WHILE
+##
+## Ends in an error in state: 115.
+##
+## option(preceded(ASSIGN,expr)) -> ASSIGN expr . [ SEMI ]
+## rexpr -> expr . PLUS expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+##
+## The known suffix of the stack is as follows:
+## ASSIGN expr
+##
+
+Missing ; after variable declaration
+
+program: VOID ID ASSIGN WHILE
+##
+## Ends in an error in state: 30.
+##
+## option(preceded(ASSIGN,expr)) -> ASSIGN . expr [ SEMI ]
+##
+## The known suffix of the stack is as follows:
+## ASSIGN
+##
+
+Illegal identifier while, maybe you missed  a ; ?
+
+program: VOID ID LBRACKET INTEGER WHILE
+##
+## Ends in an error in state: 21.
+##
+## vardesc -> vardesc LBRACKET option(INTEGER) . RBRACKET [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## vardesc LBRACKET option(INTEGER)
+##
+
+Unterminated array declaration
+
+program: VOID ID LBRACKET WHILE
+##
+## Ends in an error in state: 19.
+##
+## vardesc -> vardesc LBRACKET . option(INTEGER) RBRACKET [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## vardesc LBRACKET
+##
+
+Unterminated array declaration
+
+program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI VOID
+##
+## Ends in an error in state: 149.
+##
+## statement -> DO statement . WHILE LPAREN expr RPAREN SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO statement
+##
+
+Expected while before void
+
+program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE LPAREN TRUE RPAREN WHILE
+##
+## Ends in an error in state: 153.
+##
+## statement -> DO statement WHILE LPAREN expr RPAREN . SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO statement WHILE LPAREN expr RPAREN
+##
+
+Expected ; before while
+
+program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE LPAREN TRUE WHILE
+##
+## Ends in an error in state: 152.
+##
+## rexpr -> expr . PLUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## statement -> DO statement WHILE LPAREN expr . RPAREN SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO statement WHILE LPAREN expr
+##
+
+Expected ) before while
+
+program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE LPAREN WHILE
+##
+## Ends in an error in state: 151.
+##
+## statement -> DO statement WHILE LPAREN . expr RPAREN SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO statement WHILE LPAREN
+##
+
+Expected ) before while
+
+program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE WHILE
+##
+## Ends in an error in state: 150.
+##
+## statement -> DO statement WHILE . LPAREN expr RPAREN SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO statement WHILE
+##
+
+Missing expression after while 
+
+program: VOID ID LPAREN RPAREN LBRACE DO VOID
+##
+## Ends in an error in state: 148.
+##
+## statement -> DO . statement WHILE LPAREN expr RPAREN SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## DO
+##
+
+expected statement or declaration before void 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN SEMI SEMI RPAREN VOID
+##
+## Ends in an error in state: 147.
+##
+## statement -> FOR LPAREN option(expr) SEMI option(expr) SEMI option(expr) RPAREN . statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr) SEMI option(expr) SEMI option(expr) RPAREN
+##
+
+expected statement or declaration before void 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN SEMI SEMI TRUE SEMI
+##
+## Ends in an error in state: 146.
+##
+## statement -> FOR LPAREN option(expr) SEMI option(expr) SEMI option(expr) . RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr) SEMI option(expr) SEMI option(expr)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 135, spurious reduction of production option(expr) -> expr
+##
+
+Expected ) before ;
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN SEMI SEMI WHILE
+##
+## Ends in an error in state: 145.
+##
+## statement -> FOR LPAREN option(expr) SEMI option(expr) SEMI . option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr) SEMI option(expr) SEMI
+##
+
+Expected expression before while 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN SEMI TRUE RPAREN
+##
+## Ends in an error in state: 144.
+##
+## statement -> FOR LPAREN option(expr) SEMI option(expr) . SEMI option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr) SEMI option(expr)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 135, spurious reduction of production option(expr) -> expr
+##
+
+Expected ; before ) 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN SEMI WHILE
+##
+## Ends in an error in state: 143.
+##
+## statement -> FOR LPAREN option(expr) SEMI . option(expr) SEMI option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr) SEMI
+##
+
+Expected expression before while 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN TRUE RPAREN
+##
+## Ends in an error in state: 142.
+##
+## statement -> FOR LPAREN option(expr) . SEMI option(expr) SEMI option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN option(expr)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 135, spurious reduction of production option(expr) -> expr
+##
+
+Expected ; before ) 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR LPAREN WHILE
+##
+## Ends in an error in state: 141.
+##
+## statement -> FOR LPAREN . option(expr) SEMI option(expr) SEMI option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR LPAREN
+##
+
+Expected expression before while 
+
+program: VOID ID LPAREN RPAREN LBRACE FOR WHILE
+##
+## Ends in an error in state: 140.
+##
+## statement -> FOR . LPAREN option(expr) SEMI option(expr) SEMI option(expr) RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## FOR
+##
+
+Expected ( before while 
+
+program: VOID ID LPAREN RPAREN LBRACE IF LPAREN TRUE RPAREN TRUE SEMI ELSE VOID
+##
+## Ends in an error in state: 160.
+##
+## elseblock -> ELSE . statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## ELSE
+##
+
+Expected statement or declaration before void 
+
+program: VOID ID LPAREN RPAREN LBRACE IF LPAREN TRUE RPAREN TRUE SEMI SHORTMUL
+##
+## Ends in an error in state: 159.
+##
+## statement -> IF LPAREN expr RPAREN statement . elseblock [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## IF LPAREN expr RPAREN statement
+##
+
+Expected statement or declaration  before *= 
+
+program: VOID ID LPAREN RPAREN LBRACE IF LPAREN TRUE RPAREN VOID
+##
+## Ends in an error in state: 139.
+##
+## statement -> IF LPAREN expr RPAREN . statement elseblock [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## IF LPAREN expr RPAREN
+##
+
+Expected statement or declaration  before *= 
+
+program: VOID ID LPAREN RPAREN LBRACE IF LPAREN TRUE WHILE
+##
+## Ends in an error in state: 138.
+##
+## rexpr -> expr . PLUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## statement -> IF LPAREN expr . RPAREN statement elseblock [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## IF LPAREN expr
+##
+
+Expected ) before while 
+
+program: VOID ID LPAREN RPAREN LBRACE IF LPAREN WHILE
+##
+## Ends in an error in state: 137.
+##
+## statement -> IF LPAREN . expr RPAREN statement elseblock [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## IF LPAREN
+##
+
+Expected ) before while 
+
+program: VOID ID LPAREN RPAREN LBRACE IF WHILE
+##
+## Ends in an error in state: 136.
+##
+## statement -> IF . LPAREN expr RPAREN statement elseblock [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## IF
+##
+
+Expected expression after if 
+
+program: VOID ID LPAREN RPAREN LBRACE RETURN TRUE RPAREN
+##
+## Ends in an error in state: 133.
+##
+## statement -> RETURN option(expr) . SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## RETURN option(expr)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 135, spurious reduction of production option(expr) -> expr
+##
+
+Expected ; before )
+
+program: VOID ID LPAREN RPAREN LBRACE RETURN TRUE WHILE
+##
+## Ends in an error in state: 135.
+##
+## option(expr) -> expr . [ SEMI RPAREN ]
+## rexpr -> expr . PLUS expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+##
+## The known suffix of the stack is as follows:
+## expr
+##
+
+Expected ; before while 
+
+program: VOID ID LPAREN RPAREN LBRACE RETURN WHILE
+##
+## Ends in an error in state: 132.
+##
+## statement -> RETURN . option(expr) SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## RETURN
+##
+
+Expected ; before while 
+
+program: VOID ID LPAREN RPAREN LBRACE SHORTMUL
+##
+## Ends in an error in state: 127.
+##
+## block -> LBRACE . list(stmtordec) RBRACE [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE EOF ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## LBRACE
+##
+
+Expected statement or declaration before *= 
+
+program: VOID ID LPAREN RPAREN LBRACE TRUE SEMI SHORTMUL
+##
+## Ends in an error in state: 167.
+##
+## list(stmtordec) -> stmtordec . list(stmtordec) [ RBRACE ]
+##
+## The known suffix of the stack is as follows:
+## stmtordec
+##
+
+Expected statement or declaration before *= 
+
+program: VOID ID LPAREN RPAREN LBRACE TRUE WHILE
+##
+## Ends in an error in state: 155.
+##
+## rexpr -> expr . PLUS expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES SEMI PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## statement -> expr . SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## expr
+##
+
+Expected ; before while 
+
+program: VOID ID LPAREN RPAREN LBRACE VOID ID RPAREN
+##
+## Ends in an error in state: 164.
+##
+## stmtordec -> vardecl . option(preceded(ASSIGN,expr)) SEMI [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## vardecl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 24, spurious reduction of production vardecl -> typ vardesc
+##
+
+Expected ; before )
+
+program: VOID ID LPAREN RPAREN LBRACE WHILE LPAREN TRUE RPAREN VOID
+##
+## Ends in an error in state: 131.
+##
+## statement -> WHILE LPAREN expr RPAREN . statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## WHILE LPAREN expr RPAREN
+##
+
+Expected statement or declaration before void 
+
+program: VOID ID LPAREN RPAREN LBRACE WHILE LPAREN TRUE WHILE
+##
+## Ends in an error in state: 130.
+##
+## rexpr -> expr . PLUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MINUS expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . TIMES expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . MOD expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . DIVIDE expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . AND expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . OR expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GT expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . LEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . GEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . EQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## rexpr -> expr . NEQ expr [ TIMES RPAREN PLUS OR NEQ MOD MINUS LT LEQ GT GEQ EQ DIVIDE AND ]
+## statement -> WHILE LPAREN expr . RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## WHILE LPAREN expr
+##
+
+Expected ) before while 
+
+program: VOID ID LPAREN RPAREN LBRACE WHILE LPAREN WHILE
+##
+## Ends in an error in state: 129.
+##
+## statement -> WHILE LPAREN . expr RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## WHILE LPAREN
+##
+
+Expected ) before while 
+
+program: VOID ID LPAREN RPAREN LBRACE WHILE WHILE
+##
+## Ends in an error in state: 128.
+##
+## statement -> WHILE . LPAREN expr RPAREN statement [ WHILE VOID TRUE TIMES STRUCT STRING RETURN RBRACE NULL NOT MINUS LPAREN LBRACE INTEGER INT INCREMENT IF ID FOR FLOATLIT FLOAT FALSE ELSE DO DECREMENT CHARLIT CHAR BOOL ADDRESS ]
+##
+## The known suffix of the stack is as follows:
+## WHILE
+##
+
+Expected expression after while 
+
+program: VOID ID LPAREN RPAREN WHILE
+##
+## Ends in an error in state: 126.
+##
+## topdec -> typ ID LPAREN loption(separated_nonempty_list(COMMA,vardecl)) RPAREN . block [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+##
+## The known suffix of the stack is as follows:
+## typ ID LPAREN loption(separated_nonempty_list(COMMA,vardecl)) RPAREN
+##
+
+Expected expression after while 
+
+program: VOID ID LPAREN STRUCT WHILE
+##
+## Ends in an error in state: 5.
+##
+## typ -> STRUCT . ID [ TIMES LPAREN ID ]
+##
+## The known suffix of the stack is as follows:
+## STRUCT
+##
+
+Missing ; after variable declaration
+
+program: VOID ID LPAREN VOID ID COMMA WHILE
+##
+## Ends in an error in state: 122.
+##
+## separated_nonempty_list(COMMA,vardecl) -> vardecl COMMA . separated_nonempty_list(COMMA,vardecl) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## vardecl COMMA
+##
+
+Missing ; after variable declaration
+
+program: VOID ID LPAREN VOID ID SEMI
+##
+## Ends in an error in state: 121.
+##
+## separated_nonempty_list(COMMA,vardecl) -> vardecl . [ RPAREN ]
+## separated_nonempty_list(COMMA,vardecl) -> vardecl . COMMA separated_nonempty_list(COMMA,vardecl) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## vardecl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 24, spurious reduction of production vardecl -> typ vardesc
+##
+
+Missing ; after variable declaration
+
+program: VOID ID LPAREN VOID WHILE
+##
+## Ends in an error in state: 13.
+##
+## vardecl -> typ . vardesc [ SEMI RPAREN COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## typ
+##
+
+Missing ; after variable declaration
+
+program: VOID ID LPAREN WHILE
+##
+## Ends in an error in state: 120.
+##
+## topdec -> typ ID LPAREN . loption(separated_nonempty_list(COMMA,vardecl)) RPAREN block [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+##
+## The known suffix of the stack is as follows:
+## typ ID LPAREN
+##
+
+Missing ; after variable declaration
+
+program: VOID ID SEMI WHILE
+##
+## Ends in an error in state: 173.
+##
+## list(topdec) -> topdec . list(topdec) [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## topdec
+##
+
+Expected identifier or ( before while
+
+program: VOID ID WHILE
+##
+## Ends in an error in state: 119.
+##
+## topdec -> typ ID . LPAREN loption(separated_nonempty_list(COMMA,vardecl)) RPAREN block [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+## vardesc -> ID . [ SEMI LBRACKET ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## typ ID
+##
+
+Missing ; after variable declaration
+
+program: VOID LPAREN ID RPAREN LBRACE
+##
+## Ends in an error in state: 24.
+##
+## vardecl -> typ vardesc . [ SEMI RPAREN COMMA ASSIGN ]
+## vardesc -> vardesc . LBRACKET option(INTEGER) RBRACKET [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## typ vardesc
+##
+
+Unexpected token }, maybe you forgot the name of the function?
+
+program: VOID LPAREN ID WHILE
+##
+## Ends in an error in state: 17.
+##
+## vardesc -> LPAREN vardesc . RPAREN [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+## vardesc -> vardesc . LBRACKET option(INTEGER) RBRACKET [ RPAREN LBRACKET ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN vardesc
+##
+
+Expected ) before while
+
+program: VOID LPAREN WHILE
+##
+## Ends in an error in state: 15.
+##
+## vardesc -> LPAREN . vardesc RPAREN [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+Expected ) before while
+
+program: VOID TIMES ID RPAREN
+##
+## Ends in an error in state: 29.
+##
+## topdec -> vardecl . option(preceded(ASSIGN,expr)) SEMI [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+##
+## The known suffix of the stack is as follows:
+## vardecl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 23, spurious reduction of production vardesc -> TIMES vardesc
+## In state 24, spurious reduction of production vardecl -> typ vardesc
+##
+
+Missing opening parentheses
+
+program: VOID TIMES ID WHILE
+##
+## Ends in an error in state: 23.
+##
+## vardesc -> TIMES vardesc . [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+## vardesc -> vardesc . LBRACKET option(INTEGER) RBRACKET [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## TIMES vardesc
+##
+
+Missing ; after variable declaration
+
+program: VOID TIMES WHILE
+##
+## Ends in an error in state: 14.
+##
+## vardesc -> TIMES . vardesc [ SEMI RPAREN LBRACKET COMMA ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## TIMES
+##
+
+Illegal identifier while, maybe you forgot a ; ?
+
+program: VOID WHILE
+##
+## Ends in an error in state: 118.
+##
+## topdec -> typ . ID LPAREN loption(separated_nonempty_list(COMMA,vardecl)) RPAREN block [ VOID STRUCT INT FLOAT EOF CHAR BOOL ]
+## vardecl -> typ . vardesc [ SEMI ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## typ
+##
+
+Illegal identifier while, maybe you forgot a ; ?
+
+program: WHILE
+##
+## Ends in an error in state: 0.
+##
+## program' -> . program [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+Expected variable declaration or function declaration

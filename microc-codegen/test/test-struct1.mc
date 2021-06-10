@@ -3,6 +3,7 @@ struct Node {
     struct Node* left;
     struct Node* right;
 };
+
 void print_tree_in_dfs(struct Node *root){
     if(root != NULL){
         print_tree_in_dfs((*root).left);
