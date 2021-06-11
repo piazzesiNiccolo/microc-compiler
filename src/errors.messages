@@ -26,7 +26,7 @@ program: STRUCT ID LBRACE VOID ID RPAREN
 ## In state 24, spurious reduction of production vardecl -> typ vardesc
 ##
 
-Unexpected token, maybe you forgot a ; ?
+Unexpected token, did you forget a ; ?
 
 program: STRUCT ID LBRACE VOID ID SEMI WHILE
 ##
@@ -484,7 +484,7 @@ program: VOID ID ASSIGN INCREMENT ID WHILE
 ## INCREMENT lexpr
 ##
 
-Illegal expression after ++ operator, dio you forget a ; ?
+Illegal expression after ++ operator, did you forget a ; ?
 
 program: VOID ID ASSIGN INCREMENT WHILE
 ##
@@ -496,7 +496,7 @@ program: VOID ID ASSIGN INCREMENT WHILE
 ## INCREMENT
 ##
 
-Illegal expression after ++ operator, dio you forget a ; ?
+Illegal expression after ++ operator, did you forget a ; ?
 
 program: VOID ID ASSIGN LPAREN ID RPAREN DO
 ##
@@ -1108,7 +1108,7 @@ program: VOID ID ASSIGN TRUE WHILE
 ## ASSIGN expr
 ##
 
-Illegal rigth expression in assignment, did you forget a ; ?
+Illegal right expression in assignment, did you forget a ; ?
 
 program: VOID ID ASSIGN WHILE
 ##
@@ -1120,7 +1120,7 @@ program: VOID ID ASSIGN WHILE
 ## ASSIGN
 ##
 
-Illegal rigth expression in assignment, did you forget a ; ?
+Illegal right expression in assignment, did you forget a ; ?
 
 program: VOID ID LBRACKET INTEGER WHILE
 ##
@@ -1193,7 +1193,7 @@ program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE LPAREN TRUE WHILE
 ## DO statement WHILE LPAREN expr
 ##
 
-Illegal right expression, did you forget a ?
+Illegal right expression, did you forget a ; ?
 
 program: VOID ID LPAREN RPAREN LBRACE DO TRUE SEMI WHILE LPAREN WHILE
 ##
