@@ -51,7 +51,7 @@ let () =
   | Util.Lexing_error(m) ->
     Printf.fprintf stderr "Lexing error:\n%s:%s\n" !filename m; exit 1
   | Util.Syntax_error(m) ->
-    Printf.fprintf stderr "Syntax error:\n%s:%s\n" !filename m; exit 2
+    Printf.fprintf stderr "Syntax error:\n%s:%s" !filename m; exit 2
   | Util.Semantic_error(m) ->
     Printf.fprintf stderr "Error:\n%s:%s\n" !filename m; exit 3
   |  Util.Codegen_error(m) ->

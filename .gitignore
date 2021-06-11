@@ -30,3 +30,6 @@ _opam/
 tags
 
 *errors.ml
+*.bc
+*.out
+microcc
