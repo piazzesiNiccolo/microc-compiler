@@ -25,19 +25,35 @@ let rt_support =
           formals = [];
           body = { loc = dummy_pos; node = Block []; id = 0 };
         } ) );
-    ( "print_char",
-      ( dummy_pos,
-        {
-          typ = TypV;
-          fname = "print_char";
-          formals = [ (TypC, "c") ];
-          body = { loc = dummy_pos; node = Block []; id = 0 };
-        } ) );
-    ( "print_float",
+     ( "getfloat",
       ( dummy_pos,
         {
           typ = TypF;
-          fname = "print_float";
+          fname = "getfloat";
+          formals = [];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
+     ( "getchar",
+      ( dummy_pos,
+        {
+          typ = TypC;
+          fname = "getcharacter";
+          formals = [];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
+    ( "printchar",
+      ( dummy_pos,
+        {
+          typ = TypV;
+          fname = "printchar";
+          formals = [ (TypC, "c") ];
+          body = { loc = dummy_pos; node = Block []; id = 0 };
+        } ) );
+    ( "printfloat",
+      ( dummy_pos,
+        {
+          typ = TypF;
+          fname = "printfloat";
           formals = [ (TypF, "f") ];
           body = { loc = dummy_pos; node = Block []; id = 0 };
         } ) );

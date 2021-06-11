@@ -45,6 +45,7 @@ and expr = expr_node annotated_node
 and expr_node =
   | Access of access (* x    or  *p    or  a[e]     *)
   | Assign of access * expr (* x=e  or  *p=e  or  a[e]=e   *)
+  | ShortAssign of access * binop * expr
   | Addr of access (* &x   or  &*p   or  &a[e]    *)
   | ILiteral of int (* Integer literal             *)
   | FLiteral of float 

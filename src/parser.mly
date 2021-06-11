@@ -160,7 +160,7 @@ rexpr:
 | l = lexpr ASSIGN e = expr {node (Assign(l, e)) $loc}
 | u=unaryOp e=expr {node (UnaryOp(u, e)) $loc}
 | e=expr b=binOp e2=expr  {node (BinaryOp(b,e,e2)) $loc}
-| l=lexpr s=shortOp e = expr {node (Assign(l , node (BinaryOp(s,node (Access(l)) $loc,e)) $loc) ) $loc}
+| l=lexpr s=shortOp e = expr {node (ShortAssign(l,s, e )) $loc}
 | INCREMENT l = lexpr {node (UnaryOp(PreInc,node (Access(l)) $loc )) $loc}
 | DECREMENT l = lexpr {node (UnaryOp(PreDec,node (Access(l)) $loc )) $loc}
 | l  = lexpr INCREMENT {node (UnaryOp(PostInc,node (Access(l)) $loc )) $loc}

@@ -131,6 +131,12 @@ let rec expr_type scope e =
             Util.raise_semantic_error e.loc
             @@ "Cannot assign a value of type " ^ Util.string_of_type et
             ^ " to a variable of type " ^ Util.string_of_type at)
+  | ShortAssign (a, op, e) ->
+      let a_expr = { loc = e.loc; node = Access a; id = e.id } in
+      let bin_expr =
+        { loc = e.loc; node = BinaryOp (op, a_expr, e); id = e.id }
+      in
+      expr_type scope { loc = e.loc; node = Assign (a, bin_expr); id = e.id }
   | Addr a ->
       let at = access_type scope a in
       TypP at
@@ -315,13 +321,12 @@ let check_topdecl scope node =
   | Fundecl f -> check_func f scope node.loc
   | Vardec (t, i, None) -> check_var_decl scope node.loc (t, i)
   | Vardec (t, i, Some e) -> (
-     
       match (t, e.node) with
       | TypA (TypC, None), String str ->
           string_var_initialization node.loc scope.var_symbols 0 i str
       | TypA (TypC, Some v), String str ->
           string_var_initialization node.loc scope.var_symbols v i str
-      | _ -> 
+      | _ ->
           check_var_decl scope node.loc (t, i);
           let et = global_expr_type scope node.loc e in
           if match_types node.loc t et then ()
