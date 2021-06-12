@@ -2,7 +2,7 @@
         open Ast
         open Lexing
         open Util
-        open Lexing
+       
 
         let node nd loc = {loc = loc; node = nd; id=0}
        
@@ -125,7 +125,8 @@ statement:
     node (Block([for_opt_init init $loc;
               node (Stmt(
                   node (While(for_opt_cond ext_cond $loc,
-                    node (Block([node (Stmt(s)) $loc;for_opt_incr incr $loc])) $loc)) 
+                    node (Block([node (Stmt(s)) $loc;for_opt_incr incr $loc])) 
+                    $loc)) 
                   $loc)) 
               $loc;
               ])) 

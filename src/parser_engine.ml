@@ -27,7 +27,7 @@ let rec parse_buf lexbuf (checkpoint : Ast.program I.checkpoint) =
       Util.raise_syntax_error lexbuf err
   | I.Accepted v -> v
   | I.Rejected ->
-       Util.raise_syntax_error lexbuf "Input rejected by the parser"
+       assert false (* We stop at the first error, so this is never reached*)
 
 let parse lexbuf = parse_buf lexbuf (Parser.Incremental.program lexbuf.lex_curr_p) 
   
