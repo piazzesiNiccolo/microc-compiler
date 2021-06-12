@@ -2,6 +2,8 @@
 
 clang="clang -w"
 
+make 
+
 for file in test/*.mc; do
     name=${file%%.*}
     echo "Running $name"

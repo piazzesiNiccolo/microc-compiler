@@ -362,7 +362,7 @@ let check_global_properties scope =
   | Some (loc, _) -> Util.raise_semantic_error loc "Invalid signature of main"
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 
-let support_functions =
+let rt_support=
   let init_scope = Symbol_table.empty_table () in
   List.iter
     (fun (name, f) -> Symbol_table.add_entry name f init_scope |> ignore)
@@ -372,7 +372,7 @@ let support_functions =
 let check (Prog topdecls) =
   let toplevel_scope =
     {
-      fun_symbols = support_functions;
+      fun_symbols = rt_support;
       var_symbols = Symbol_table.empty_table ();
       struct_symbols = Symbol_table.empty_table ();
     }

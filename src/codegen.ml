@@ -480,15 +480,18 @@ let codegen_topdecl llmodule scope n =
       L.struct_set_body named_s (Array.of_list fields_t) false
 
 let add_rt_support llmodule scope =
+  let params_to_array params =
+    params |> List.map fst
+    |> List.map (build_llvm_type scope.struct_symbols)
+    |> Array.of_list
+  in
+  let fun_type f =
+    L.function_type
+      (build_llvm_type scope.struct_symbols f.typ)
+      (params_to_array f.formals)
+  in
   Util.rt_support
-  |> List.map (fun (n, (_, f)) ->
-         ( n,
-           L.function_type
-             (build_llvm_type scope.struct_symbols f.typ)
-             (List.map
-                (build_llvm_type scope.struct_symbols)
-                (List.map fst f.formals)
-             |> Array.of_list) ))
+  |> List.map (fun (n, (_, f)) -> (n, fun_type f))
   |> List.iter (fun (n, t) ->
          Symbol_table.add_entry n
            (L.declare_function n t llmodule)
