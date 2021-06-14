@@ -31,5 +31,5 @@ tags
 
 *errors.ml
 *.bc
-*.out
+
 microcc

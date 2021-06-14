@@ -31,11 +31,11 @@ let letter = ['a'-'z' 'A'-'Z']
 let exponent   = ['e' 'E'] ['-' '+']? digit+
 let float      = (digit digit* '.' digit* | digit* '.' digit digit*) exponent?
 let id = ('_' | letter )('_' | letter | digit)*
-let newline = '\r'|'\n'|"\r\n"
-let ws = [' ' '\t']
+let newline = '\r'|'\n'| '\n' '\r'
+let ws = [' ' '\t']+
 rule token = parse
     | ws+       {token lexbuf}
-    | newline+ {Lexing.new_line lexbuf; token lexbuf}
+    | newline {Lexing.new_line lexbuf; token lexbuf}
     | id as word 
         {
           match Hashtbl.find_opt keywords word with 
@@ -91,6 +91,8 @@ and singlelinecomment = parse
 
 and multilinecomment = parse
     | "*/" {token lexbuf}
+    | newline {Lexing.new_line lexbuf; multilinecomment lexbuf}
+    | eof {Util.raise_lexer_error lexbuf "Unexpected end of file in comment"}
     | _ { multilinecomment lexbuf}
 
 and get_char = parse 

@@ -17,6 +17,7 @@ for file in test/*.mc; do
         rm -f $name.elf
         break
     fi
+    echo "Test passed!"
     rm -f $name.elf
   
 done
