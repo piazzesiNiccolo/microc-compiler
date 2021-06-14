@@ -1,21 +1,22 @@
-#pragma clang diagnostic ignored "-Woverride-module"
 #include <stdio.h>
 #include <stdlib.h>
 
 
 int getint(){
   int n;
-  scanf("%d\n",&n);
+  scanf("%d",&n);
   return n;
 }
 float getfloat(){
   float f;
-  scanf("%f\n",&f);
+  scanf("%f",&f);
   return f;
 }
 
 char getcharacter(){
-  return getchar();
+  char c;
+  scanf(" %c",&c);
+  return c;
 }
 
 void printchar(char c){

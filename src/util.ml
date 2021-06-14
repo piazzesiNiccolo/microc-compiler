@@ -33,7 +33,7 @@ let rt_support =
           formals = [];
           body = { loc = dummy_pos; node = Block []; id = 0 };
         } ) );
-     ( "getchar",
+     ( "getcharacter",
       ( dummy_pos,
         {
           typ = TypC;
