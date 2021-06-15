@@ -1,13 +1,12 @@
 #!/bin/bash
 
 clang="clang -w"
-
-make 
+microcc="./microcc"
 
 for file in test/*.mc; do
     name=${file%%.*}
     echo "Running $name"
-    ./microcc $name.mc -o $name.bc
+    $microcc $name.mc -o $name.bc
     if [ $? -ne 0 ]; then
         break
     fi

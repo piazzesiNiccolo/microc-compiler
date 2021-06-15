@@ -29,7 +29,7 @@
 let digit = ['0' - '9']
 let letter = ['a'-'z' 'A'-'Z']
 let exponent   = ['e' 'E'] ['-' '+']? digit+
-let float      = (digit digit* '.' digit* | digit* '.' digit digit*) exponent?
+let float      = (digit digit* '.' digit* | digit* '.' digit digit*) exponent? | digit+ exponent
 let id = ('_' | letter )('_' | letter | digit)*
 let newline = '\r'|'\n'| '\n' '\r'
 let ws = [' ' '\t']+
