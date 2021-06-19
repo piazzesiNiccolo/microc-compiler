@@ -204,8 +204,8 @@ let rec codegen_expr scope builder e =
         match e.node with
         | Access a ->
             a
-            (*we defer loading the value, to correctly used the abbreviated operator *)
-        | _ -> failwith "Unreachable statement"
+            (*we defer loading the value, to correctly use the abbreviated operator *)
+        | _ -> assert false (*Abbreviated increments are only defined with access expression *)
       in
       let e_val = codegen_access scope builder access_e in
       build_unary_incr_or_decr builder op e_val
@@ -300,7 +300,7 @@ and codegen_access scope builder a =
 
       match Symbol_table.lookup (Option.get sname) scope.struct_symbols with
       | Some (t, fields) ->
-          (*checks that the given filed exists and gets its index *)
+          (*checks that the given field exists and gets its index *)
           let to_index = List.mapi (fun i m -> (m, i)) fields in
           let field_pos =
             match List.assoc_opt f to_index with
