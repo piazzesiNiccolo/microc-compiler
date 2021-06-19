@@ -3,7 +3,7 @@
         open Lexing
         open Util
        
-
+        (* helper function to create the AST nodes*)
         let node nd loc = {loc = loc; node = nd; id=0}
        
          (* utility functions to convert a for to a while *)         
@@ -94,10 +94,12 @@ typ:
   | STRUCT i = ID {TypS(i)}
 ;
 vardecl:
+/* Unwraps the type declarations, applying the final function to t */
 | t = typ v = vardesc {((fst v) t, snd v)}
 ;
 
 vardesc:
+/* The inner type is given by vardesc so we compose functions instead of directly applying the type*/
 | i = ID  {((fun t -> t), i)} 
 | TIMES v = vardesc %prec ADDRESS {((fun t->fst v (TypP(t))) , snd v )}
 | LPAREN v = vardesc RPAREN {v}
@@ -121,7 +123,9 @@ statement:
 | DO s = statement WHILE LPAREN e = expr RPAREN SEMI {node (DoWhile(e, s)) $loc}
 | WHILE LPAREN e = expr RPAREN s=statement {node (While(e, s)) $loc}
 | FOR LPAREN init = option(expr) SEMI ext_cond = option(expr) SEMI incr=option(expr) RPAREN s=statement
+/* Desugar the for declaration into an equivalent while */
 {
+  
     node (Block([for_opt_init init $loc;
               node (Stmt(
                   node (While(for_opt_cond ext_cond $loc,
@@ -137,6 +141,7 @@ statement:
 ;
 
 elseblock:
+/* Give precedence to if without else */
   | %prec NOELSE{node (Block([])) $loc}
   | ELSE st=statement {st}
 ;

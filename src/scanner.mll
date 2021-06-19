@@ -1,7 +1,7 @@
 {
     open Parser
     open Lexing
-
+    (*helper function to create the keywords table *)
     let create_hashtable size init =
         let table = Hashtbl.create size in
         List.iter(fun (key, value) -> Hashtbl.add table key value ) init;

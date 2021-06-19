@@ -1,28 +1,4 @@
-# MicroC code generation
-
-The goal of this assignment is to translate MicroC code into LLVM IR code.
-
-## The static semantics of MicroC
-
-MicroC mainly follows the same rules of language C with some exceptions described below.
-
-### Code generation & runtime support
-For the code generation, you should use the LLVM API we presented during the classes.
-Remember that you only generate code for semantically correct programs, thus, you can be sure that
-some situations are catch in the previous compilation stages.
-
-MicroC support two library functions to perform I/O operations:
-* `void print(int)` to print an integer on the standard output;
-* `int getint()` to read an integer from the standard input.
-
-Their implementation is written in C and it is the file `src/rt-support.c`. 
-During the code generation phase, the module that you generate must include the 
-corresponding prototype for these library functions.
-
-Once you produce a bitcode file, to run your application you have to link it with 
-the object code of the runtime support. 
-To do that, you can use the LLVM command line tools we described during the lectures, e.g.,
-`llvm-link`, `clang`.  
+# MicroC compiler
 
 ## Requirement to build the code
 The code requires:
@@ -55,6 +31,12 @@ The directory `test` contains some test cases that you can use to test your impl
 Each test case consists of a small MicroC program (the file with extension `*.mc`) together 
 with the result that the program is supposed to produce (the file with extension `*.out`).
 
+You can run these tests with the `run_tests.sh` exectuable. Simply execute the following command:
+
+```bash
+$ bash run_tests.sh
+```
+
 ## Directory structure #
 
 Here is a description of content of the repository
@@ -62,8 +44,9 @@ Here is a description of content of the repository
     src/                               <-- The source code lives here
     Makefile                           <-- Driver for `make` (uses OCB)
     _tags                              <-- OCamlBuild configuration
-    tests/                             <-- Some programs to test your implementation
-
+    tests/                             <-- Some programs to test 
+                                        your implementation
+    run_tests.sh                       <-- Script to run the unit tests
 ## The source code
 
 The `src/` directory provides:

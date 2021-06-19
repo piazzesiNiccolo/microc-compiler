@@ -13,6 +13,14 @@ type symbols = {
   struct_symbols : struct_info Symbol_table.t;
 }
 
+(*
+  Function that allows strings to be used as variable initializer
+
+  - If the array is declared with no initial size, the assigned size will be equal to string_length + 1(for null)
+  - Otherwise we only assign the string if the array has bigger size. 
+
+  This function  could be modified to handle general array literals
+ *)
 let string_var_initialization loc vars array_length id string =
   try
     let length = string |> String.length in
@@ -33,6 +41,7 @@ let string_var_initialization loc vars array_length id string =
     @@ "Variable " ^ id ^ " already defined in current scope"
 
 let rec defined_type_size t =
+  (*checks if the given type is complete *)
   match t with
   | TypA (t, Some _) -> defined_type_size t
   | TypA (t, None) -> false
@@ -76,6 +85,11 @@ let check_fun_type loc t =
       @@ "Illegal function type " ^ Util.string_of_type t
   | _ -> ()
 
+(* 
+- Checks that arrays can be unified
+- Allows NULL to be assigned to pointers with different element type 
+
+*)
 let rec match_types loc t1 t2 =
   match (t1, t2) with
   | TypA (t1, Some v), TypA (t2, Some v2) when v = v2 -> match_types loc t1 t2
@@ -88,13 +102,15 @@ let rec match_types loc t1 t2 =
   | TypP t1, TypP t2 -> match_types loc t1 t2
   | t1, t2 -> t1 = t2
 
+
 let binaryexp_type loc op et1 et2 =
+
   match (op, et1, et2) with
   | (Add | Sub | Mult | Div | Mod | Comma), TypI, TypI -> TypI
   | (Add | Sub | Mult | Div | Mod | Comma), TypF, TypF -> TypF
   | (Equal | Neq | Less | Leq | Greater | Geq), TypI, TypI -> TypB
   | (Equal | Neq | Less | Leq | Greater | Geq), TypF, TypF -> TypB
-  | (Equal | Neq), TypC, TypC -> TypB
+  | (Equal | Neq), TypC, TypC -> TypB (*For simplicity only equality checks are allowed on characters *)
   | (Equal | Neq), TypP _, TypNull -> TypB
   | (Equal | Neq), TypNull, TypP _ -> TypB
   | (Equal | Neq), TypP t1, TypP t2 when match_types loc t1 t2 -> TypB
@@ -116,6 +132,7 @@ let unaryexp_type loc u et =
       @@ "Operator " ^ Util.string_of_uop u ^ " not defined for type "
       ^ Util.string_of_type et
 
+(* Assigns a type to the given expression, following language rules *)
 let rec expr_type scope e =
   match e.node with
   | Access a -> access_type scope a
@@ -132,6 +149,7 @@ let rec expr_type scope e =
             @@ "Cannot assign a value of type " ^ Util.string_of_type et
             ^ " to a variable of type " ^ Util.string_of_type at)
   | ShortAssign (a, op, e) ->
+    (* Desugar a += e to a = a+e, to simplify checks *)
       let a_expr = { loc = e.loc; node = Access a; id = e.id } in
       let bin_expr =
         { loc = e.loc; node = BinaryOp (op, a_expr, e); id = e.id }
@@ -154,6 +172,11 @@ let rec expr_type scope e =
       let et2 = expr_type scope e2 in
       binaryexp_type e.loc op et1 et2
   | Call (id, params) -> (
+      (*
+        - Checks that the called function exists in the current scope
+        - Checks that the correct number of arguments is passed
+        . Checks that the parameters passed have the correct type  
+       *)
       let params_types = List.map (expr_type scope) params in
       match Symbol_table.lookup id scope.fun_symbols with
       | Some (_, f) -> (
@@ -203,6 +226,10 @@ and access_type scope a =
       | _ -> Util.raise_semantic_error a.loc "Index of array must be an integer"
       )
   | AccField (s, f) -> (
+    (* 
+      - Checks that the variable is an existing structure
+      - CHecks that the field exists
+    *)
       match access_type scope s with
       | TypS s -> (
           match Symbol_table.lookup s scope.struct_symbols with
@@ -226,13 +253,10 @@ let rec check_stmt scope ftype s =
         Util.raise_semantic_error s.loc "If condition is not boolean"
       else check_stmt scope ftype s1;
       check_stmt scope ftype s2
-  | DoWhile (e, s) ->
-      if expr_type scope e <> TypB then
-        Util.raise_semantic_error s.loc "Condition is not boolean"
-      else check_stmt scope ftype s
+  | DoWhile (e, s) 
   | While (e, s) ->
       if expr_type scope e <> TypB then
-        Util.raise_semantic_error s.loc "Condition is not boolean"
+        Util.raise_semantic_error s.loc " Loop condition is not boolean"
       else check_stmt scope ftype s
   | Expr e -> expr_type scope e |> ignore
   | Return (Some e) ->
@@ -264,7 +288,7 @@ and check_stmtordec scope ftype s =
           check_var_decl scope s.loc (t, i);
           let et = expr_type scope e in
           match et with
-          | TypA (_, _) ->
+          | TypA (_, _) -> (* Array initializers are disallowed *)
               Util.raise_semantic_error s.loc
                 "Array is not a valid value initializer"
           | _ ->
@@ -272,7 +296,9 @@ and check_stmtordec scope ftype s =
               else Util.raise_semantic_error s.loc "Value of different type"))
   | Stmt s -> check_stmt scope ftype s
 
+
 let check_parameter scope loc (t, i) =
+  (* Function parameters are treated slightly different from normal variables. We only forbid void variables, but unsized arrays are allowed *)
   match t with
   | TypV -> Util.raise_semantic_error loc @@ "Illegal void parameter " ^ i
   | _ -> (
@@ -282,7 +308,15 @@ let check_parameter scope loc (t, i) =
         Util.raise_semantic_error loc
         @@ "Parameter " ^ i ^ " already defined in current scope")
 
+
+(*
+  - Checks that the function type is allowed
+  - Adds function name to the symbol table, for recursive calls
+  - Checks that paramets are properly defined
+  - Recursively checks the function body
+*)
 let check_func f scope loc =
+
   check_fun_type loc f.typ;
   let rec_scope =
     try Symbol_table.add_entry f.fname (loc, f) scope.fun_symbols
@@ -302,6 +336,7 @@ let check_func f scope loc =
   Symbol_table.end_block new_scope.var_symbols |> ignore
 
 let rec global_expr_type scope loc e =
+  (*checks that a global variable is initialized with a constant value *)
   match e.node with
   | ILiteral _ | CLiteral _ | BLiteral _ | FLiteral _ | String _ | Null ->
       expr_type scope e
@@ -329,10 +364,11 @@ let check_topdecl scope node =
       | _ ->
           check_var_decl scope node.loc (t, i);
           let et = global_expr_type scope node.loc e in
-          if match_types node.loc t et then ()
+          if match_types node.loc t et then () (* since global expression cannot be arrays we can directly use match_types *)
           else Util.raise_semantic_error node.loc "Value of different type")
   | Structdecl s -> (
       try
+        (*immediately adds its own name to defined structs *)
         Symbol_table.add_entry s.sname (node.loc, s) scope.struct_symbols
         |> ignore;
         let struct_scope =
@@ -341,6 +377,7 @@ let check_topdecl scope node =
             var_symbols = Symbol_table.begin_block scope.var_symbols;
           }
         in
+        (*checks that fields are properly declared  and adds them to the inner scope*)
         List.iter
           (fun f ->
             match f with
@@ -355,6 +392,7 @@ let check_topdecl scope node =
         @@ "Structure " ^ s.sname ^ " already defined")
 
 let check_global_properties scope =
+  (*function used to check "global properties about the program", here it's used to verify the presence of main function *)
   let m = Symbol_table.lookup "main" scope.fun_symbols in
   match m with
   | Some (_, { typ = TypV; fname = "main"; formals = [] }) -> ()
@@ -363,6 +401,7 @@ let check_global_properties scope =
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 
 let rt_support=
+(*adds library functions info *)
   let init_scope = Symbol_table.empty_table () in
   List.iter
     (fun (name, f) -> Symbol_table.add_entry name f init_scope |> ignore)
@@ -377,5 +416,6 @@ let check (Prog topdecls) =
       struct_symbols = Symbol_table.empty_table ();
     }
   in
+  (*Iterate and check top declarations *)
   List.iter (check_topdecl toplevel_scope) topdecls;
   check_global_properties toplevel_scope |> ignore

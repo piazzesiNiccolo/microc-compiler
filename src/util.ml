@@ -7,6 +7,7 @@ exception Semantic_error of string
 exception Codegen_error of string
 open Ast
 
+(* Support functions. Getcharacter is not called getchar to avoid issues with the existing getchar c function *)
 let rt_support =
   [
     ( "print",
@@ -59,6 +60,8 @@ let rt_support =
         } ) );
   ]
 
+
+(*Utility functions to pretty print types and operators *)
 let rec string_of_type  = function
   | TypI -> "int" 
   | TypC -> "char"
@@ -92,6 +95,7 @@ let string_of_binop = function
   | And -> "&&"
   | Or -> "||"
   | Comma -> ","
+  
 
 let get_lexing_position lexbuf =
   let p = Lexing.lexeme_start_p lexbuf in
