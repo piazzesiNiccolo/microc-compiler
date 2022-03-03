@@ -1,7 +1,7 @@
 (ocamllex scanner)
 
 (menhir
-  (flags --table --explain)
+  (flags --table --explain --dump --strict)
   (modules parser))
 
 (rule 
