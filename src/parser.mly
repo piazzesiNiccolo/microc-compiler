@@ -1,7 +1,6 @@
  %{
         open Ast
-        open Lexing
-        open Util
+      
        
         (* helper function to create the AST nodes*)
         let node nd loc = {loc = loc; node = nd; id=0}

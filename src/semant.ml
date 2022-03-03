@@ -12,7 +12,6 @@ type symbols = {
   var_symbols : var_info Symbol_table.t;
   struct_symbols : struct_info Symbol_table.t;
 }
-
 (*
   Function that allows strings to be used as variable initializer
 
@@ -24,6 +23,7 @@ type symbols = {
 let string_var_initialization loc vars array_length id string =
   try
     let length = string |> String.length in
+    
     if array_length = 0 then
       Symbol_table.add_entry id (loc, TypA (TypC, Some (length + 1))) vars
       |> ignore
@@ -34,6 +34,7 @@ let string_var_initialization loc vars array_length id string =
       ^ " but array was declared with size "
       ^ (array_length |> string_of_int)
     else
+      
       Symbol_table.add_entry id (loc, TypA (TypC, Some array_length)) vars
       |> ignore
   with DuplicateEntry ->
@@ -44,14 +45,15 @@ let rec defined_type_size t =
   (*checks if the given type is complete *)
   match t with
   | TypA (t, Some _) -> defined_type_size t
-  | TypA (t, None) -> false
+  | TypA (_, None) -> false
   | _ -> true
 
 let rec check_type structs loc t =
   match t with
   | TypA (TypV, _) ->
       Util.raise_semantic_error loc "Trying to define a void array"
-  | TypA (t, Some i) when i < 1 ->
+      
+  | TypA (_, Some i) when i < 1 ->
       Util.raise_semantic_error loc "Array must have size > 0"
   | TypA (t, _) when not (defined_type_size t) ->
       Util.raise_semantic_error loc "Array size undefined"
@@ -66,7 +68,7 @@ let rec check_type structs loc t =
 let check_var_type structs loc t =
   match t with
   | TypV -> Util.raise_semantic_error loc "Trying to define a void variable"
-  | TypA (t, None) ->
+  | TypA (_, None) ->
       Util.raise_semantic_error loc
         "Array must be declared with an initial size"
   | _ -> check_type structs loc t
@@ -93,7 +95,7 @@ let check_fun_type loc t =
 let rec match_types loc t1 t2 =
   match (t1, t2) with
   | TypA (t1, Some v), TypA (t2, Some v2) when v = v2 -> match_types loc t1 t2
-  | TypA (t1, Some v), TypA (t2, Some v2) when v <> v2 ->
+  | TypA (_, Some v), TypA (_, Some v2) when v <> v2 ->
       Util.raise_semantic_error loc "Array size must be the same"
   | TypA (t1, None), TypA (t2, _) | TypA (t1, _), TypA (t2, None) ->
       match_types loc t1 t2
@@ -180,7 +182,7 @@ let rec expr_type scope e =
       let params_types = List.map (expr_type scope) params in
       match Symbol_table.lookup id scope.fun_symbols with
       | Some (_, f) -> (
-          let formals_types = List.map (fun (t, i) -> t) f.formals in
+          let formals_types = List.map (fun (t, _) -> t) f.formals in
           match (List.length params_types, List.length formals_types) with
           | l1, l2 when l1 < l2 ->
               Util.raise_semantic_error e.loc
@@ -234,7 +236,7 @@ and access_type scope a =
       | TypS s -> (
           match Symbol_table.lookup s scope.struct_symbols with
           | Some (_, s) -> (
-              match List.find_opt (fun (t, i) -> i = f) s.fields with
+              match List.find_opt (fun (_, i) -> i = f) s.fields with
               | Some (t, _) -> t
               | None ->
                   Util.raise_semantic_error a.loc
@@ -395,8 +397,8 @@ let check_global_properties scope =
   (*function used to check "global properties about the program", here it's used to verify the presence of main function *)
   let m = Symbol_table.lookup "main" scope.fun_symbols in
   match m with
-  | Some (_, { typ = TypV; fname = "main"; formals = [] }) -> ()
-  | Some (_, { typ = TypI; fname = "main"; formals = [] }) -> ()
+  | Some (_, { typ = TypV; fname = "main"; formals = []; body=_}) -> ()
+  | Some (_, { typ = TypI; fname = "main"; formals = []; body=_ }) -> ()
   | Some (loc, _) -> Util.raise_semantic_error loc "Invalid signature of main"
   | None -> Util.raise_semantic_error dummy_pos " No main function defined"
 

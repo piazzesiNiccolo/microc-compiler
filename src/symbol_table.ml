@@ -13,7 +13,7 @@ let end_block table =
 let add_entry symbol info table =
   match table with
   | Dummy -> failwith "No scope currently defined"
-  | Table (p, t) as x -> (
+  | Table (_, t) as x -> (
       match Hashtbl.find_opt t symbol with
       | None ->
           Hashtbl.add t symbol info;

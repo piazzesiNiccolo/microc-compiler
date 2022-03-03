@@ -1,14 +1,12 @@
-module L = Llvm
 
 let optimize_module llvm_module =
   let pass_manager = Llvm.PassManager.create () in
-
+  
   (* memory to register promontion *)
   Llvm_scalar_opts.add_memory_to_register_promotion pass_manager;
 
   (* constant propagation *)
-  Llvm_scalar_opts.add_constant_propagation pass_manager;
-
+  Llvm_scalar_opts.add_correlated_value_propagation pass_manager;
   (* loop unrolling *)
   Llvm_scalar_opts.add_loop_unroll pass_manager;
 

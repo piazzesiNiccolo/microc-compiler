@@ -1,0 +1,17 @@
+(ocamllex scanner)
+
+(menhir
+  (flags --table --explain)
+  (modules parser))
+
+(rule 
+  (targets error.ml)
+  (deps errors.messages parser.mly)
+  (action (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
+
+(executable 
+ (name microcc)
+ (public_name microcc)
+ (libraries menhirLib llvm llvm.analysis llvm.bitwriter llvm.scalar_opts)
+ (preprocess
+  (pps ppx_deriving.show)))

@@ -1,4 +1,3 @@
-open Util
 open Lexing
 
 module I = Parser.MenhirInterpreter
