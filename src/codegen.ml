@@ -100,7 +100,7 @@ let bin_op = function
   | t1, t2, Equal when t1 = bool_type && t2 = bool_type ->
       L.build_icmp L.Icmp.Eq
   | t1, t2, Neq when t1 = bool_type && t2 = bool_type -> L.build_icmp L.Icmp.Ne
-  | t1, t2, _ -> Util.raise_codegen_error "Type mismatch between operands"
+  | _ -> Util.raise_codegen_error "Type mismatch between operands"
 
 (* Uses const instructions when dealing with global expressions *)
 let const_op = function
@@ -299,7 +299,7 @@ and codegen_access scope builder a =
       let sname = L.type_of a_val |> L.element_type |> L.struct_name in
 
       match Symbol_table.lookup (Option.get sname) scope.struct_symbols with
-      | Some (t, fields) ->
+      | Some (_, fields) ->
           (*checks that the given field exists and gets its index *)
           let to_index = List.mapi (fun i m -> (m, i)) fields in
           let field_pos =

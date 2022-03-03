@@ -1,12 +1,12 @@
 #!/bin/bash
 
 clang="clang -w"
-microcc="./microcc"
+microcc="microcc"
 
 for file in test/*.mc; do
     name=${file%%.*}
     echo "Running $name"
-    $microcc $name.mc -o $name.bc
+    dune exec -- $microcc $name.mc -o $name.bc
     if [ $? -ne 0 ]; then
         break
     fi
